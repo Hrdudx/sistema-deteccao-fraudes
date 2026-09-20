@@ -1,0 +1,66 @@
+.home h1 {
+  margin-bottom: 4px;
+}
+
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin: 24px 0;
+}
+
+.kpi-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.kpi-card strong {
+  font-size: 1.8rem;
+}
+
+.ocorrencias-por-tipo,
+.resumo-mes,
+.resumo-dia {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.linha-tipo {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+td {
+  padding: 8px 4px;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 0.9rem;
+}
+
+.prioridade-alta {
+  color: #b91c1c;
+  font-weight: 600;
+}
+
+.prioridade-media {
+  color: #b45309;
+  font-weight: 600;
+}
+
+.erro {
+  color: #b91c1c;
+}

@@ -1,0 +1,30 @@
+<nav class="sidebar">
+  <div class="logo">
+    <strong>SGR</strong>
+    <span>Sistema de Gerenciamento de Riscos</span>
+  </div>
+
+  <ul>
+    <li *ngFor="let item of itensPrincipais">
+      <a [routerLink]="item.rota" routerLinkActive="ativo">{{ item.rotulo }}</a>
+    </li>
+
+    <li>
+      <button type="button" class="item-expansivel" (click)="ocorrenciasAbertas = !ocorrenciasAbertas">
+        Ocorrências
+        <span>{{ ocorrenciasAbertas ? '▾' : '▸' }}</span>
+      </button>
+      <ul class="submenu" *ngIf="ocorrenciasAbertas">
+        <li *ngFor="let categoria of categoriasOcorrencias">
+          <a [routerLink]="categoria.rota" routerLinkActive="ativo">{{ categoria.rotulo }}</a>
+        </li>
+      </ul>
+    </li>
+
+    <li *ngFor="let item of itensFinais">
+      <a [routerLink]="item.rota" routerLinkActive="ativo">{{ item.rotulo }}</a>
+    </li>
+  </ul>
+
+  <a class="sair" routerLink="/login">Sair</a>
+</nav>

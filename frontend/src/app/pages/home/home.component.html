@@ -1,0 +1,66 @@
+<div class="home">
+  <h1>Home</h1>
+  <p>Visão geral da operação de riscos financeiros</p>
+
+  <p *ngIf="carregando">Carregando dados da operação...</p>
+  <p *ngIf="erro" class="erro">{{ erro }}</p>
+
+  <ng-container *ngIf="indicadores as dados">
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <span>Ocorrências abertas</span>
+        <strong>{{ dados.ocorrenciasAbertas }}</strong>
+        <small>{{ dados.ocorrenciasCriticas }} críticas · {{ dados.ocorrenciasAltas }} altas</small>
+      </div>
+      <div class="kpi-card">
+        <span>Tratativas concluídas</span>
+        <strong>{{ dados.tratativasConcluidasHoje }}</strong>
+        <small>Hoje</small>
+      </div>
+      <div class="kpi-card">
+        <span>SLA dentro do prazo</span>
+        <strong>{{ dados.slaPercentualDentroPrazo }}%</strong>
+      </div>
+      <div class="kpi-card">
+        <span>SLA vencido</span>
+        <strong>{{ dados.slaVencidas }}</strong>
+        <small>Exige priorização</small>
+      </div>
+    </div>
+
+    <section class="ocorrencias-por-tipo">
+      <h2>Ocorrências por tipo</h2>
+      <div class="linha-tipo" *ngFor="let item of tiposDeOcorrencia">
+        <span>{{ item.tipo }}</span>
+        <strong>{{ item.total }}</strong>
+      </div>
+    </section>
+
+    <!-- Bloco principal conforme o DMS (seção 9.2): Resumo do mês vem antes do Resumo do dia -->
+    <section class="resumo-mes">
+      <h2>Resumo do mês</h2>
+      <table>
+        <tr *ngFor="let item of dados.resumoDoMes">
+          <td>{{ item.prioridade }}</td>
+          <td>{{ item.ocorrencia }}</td>
+          <td>{{ item.cliente }}</td>
+          <td>{{ item.valor | currency: 'BRL' }}</td>
+          <td>{{ item.slaRestante }}</td>
+        </tr>
+      </table>
+    </section>
+
+    <section class="resumo-dia">
+      <h2>Resumo do dia</h2>
+      <table>
+        <tr *ngFor="let item of dados.resumoDoDia">
+          <td [class]="'prioridade-' + item.prioridade.toLowerCase()">{{ item.prioridade }}</td>
+          <td>{{ item.ocorrencia }}</td>
+          <td>{{ item.cliente }}</td>
+          <td>{{ item.valor | currency: 'BRL' }}</td>
+          <td>{{ item.slaRestante }}</td>
+        </tr>
+      </table>
+    </section>
+  </ng-container>
+</div>
