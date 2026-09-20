@@ -1,5 +1,6 @@
 package br.ueg.trindade.sistemariscos_fullstack.controller;
 
+import br.ueg.trindade.sistemariscos_fullstack.dto.ClienteHistoricoDTO;
 import br.ueg.trindade.sistemariscos_fullstack.model.Cliente;
 import br.ueg.trindade.sistemariscos_fullstack.service.ClienteService;
 import jakarta.validation.Valid;
@@ -29,6 +30,10 @@ public class ClienteController {
         return service.buscarPorId(id);
     }
 
+    @GetMapping("/{id}/historico")
+    public ClienteHistoricoDTO buscarHistorico(@PathVariable String id) {
+    return service.buscarHistorico(id);
+    }
     @PostMapping
     public ResponseEntity<Cliente> criar(@Valid @RequestBody Cliente objeto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.salvar(objeto));
