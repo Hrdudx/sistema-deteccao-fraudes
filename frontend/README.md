@@ -1,27 +1,79 @@
-# SistemaRiscosFrontend
+# SGR — Frontend (Sistema de Gerenciamento de Riscos)
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 18.2.21.
+Frontend em **Angular** do Sistema de Gerenciamento de Riscos (SGR), desenvolvido para a disciplina de Práticas Interdisciplinares — UEG.
 
-## Development server
+## Stack
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+- **Framework:** Angular (standalone components)
+- **Backend/API:** Java + Spring Boot (pasta raiz deste repositório)
+- **Dados:** Databricks (camadas Silver/Gold)
 
-## Code scaffolding
+O frontend **não acessa o Databricks diretamente** — toda leitura/gravação passa pelo backend, conforme definido no Documento de Modelagem do Sistema (DMS) da equipe.
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+## Estrutura
 
-## Build
+```
+frontend/
+├── src/
+│   ├── app/
+│   │   ├── components/
+│   │   │   └── sidebar/        # Navegação lateral (menu principal)
+│   │   ├── pages/
+│   │   │   └── home/           # Tela Home (indicadores, resumo do mês/dia)
+│   │   ├── services/
+│   │   │   └── home.service.ts # Consome a API do backend (com fallback mockado)
+│   │   ├── models/
+│   │   │   └── indicadores-home.model.ts
+│   │   └── app.routes.ts       # Rotas da aplicação
+│   └── environments/
+│       └── environment.ts      # URL base da API
+```
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+## Menu e navegação
 
-## Running unit tests
+Conforme a seção 9.1 do DMS, o menu lateral segue esta estrutura:
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+- **Home**
+- **Clientes**
+- **Ocorrências**
+  - PLD
+  - Chargeback
+  - KYC
+  - Fraude
+- **Relatórios**
+- **Usuários**
 
-## Running end-to-end tests
+> Movimentações e Transacional **não** são categorias de Ocorrência (são contexto financeiro de análise) — não devem ser adicionadas ao submenu de Ocorrências.
 
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
+## Como rodar localmente
 
-## Further help
+Pré-requisitos: [Node.js](https://nodejs.org/) e [Angular CLI](https://angular.dev/tools/cli) instalados.
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+```bash
+# a partir da pasta /frontend
+npm install
+ng serve
+```
+
+Acesse `http://localhost:4200`.
+
+## Integração com o backend
+
+O `HomeService` (`src/app/services/home.service.ts`) espera um endpoint `GET /api/home/indicadores` no backend, retornando os dados no formato descrito em `src/app/models/indicadores-home.model.ts`.
+
+**Enquanto esse endpoint não existir no backend**, o serviço cai automaticamente em dados mockados — a tela funciona normalmente para desenvolvimento e demonstração, sem exigir o backend rodando.
+
+A URL base da API é configurada em `src/environments/environment.ts` (`apiUrl`).
+
+## Status (Sprint 3)
+
+- [x] Home com indicadores básicos (ocorrências abertas, tratativas, SLA)
+- [x] Blocos "Resumo do mês" (principal) e "Resumo do dia"
+- [x] Navegação lateral com o menu oficial do projeto
+- [x] Camada de serviço isolada, pronta para integrar com a API real
+- [ ] Integração real com o backend (prevista para a Sprint 4)
+- [ ] Telas de Clientes, Ocorrências, Relatórios e Usuários (outros integrantes)
+
+## Equipe
+
+Desenvolvido por Hayyra Eduarda Rocha Honorio (Home, navegação e componentes visuais) como parte do Sistema de Gerenciamento de Riscos, em conjunto com Airon Francelino, Eduarda Gabriela Rosa Protazio, Gabriella Cotrim Viana da Silva e Diogo Pereira da Silva.
