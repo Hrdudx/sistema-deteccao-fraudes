@@ -6,6 +6,7 @@ import br.ueg.trindade.sistemariscos_fullstack.repository.AlertaFraudeRepository
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.time.LocalDateTime;
 
 @Service
 public class AlertaFraudeService {
@@ -14,6 +15,24 @@ public class AlertaFraudeService {
 
     public AlertaFraudeService(AlertaFraudeRepository repository) {
         this.repository = repository;
+    }
+
+    public List<AlertaFraude> filtrar(
+        String status,
+        String severidade,
+        String tipoFraude,
+        LocalDateTime dataInicial,
+        LocalDateTime dataFinal,
+        String busca
+    ) {
+    return repository.filtrar(
+            status,
+            severidade,
+            tipoFraude,
+            dataInicial,
+            dataFinal,
+            busca
+    );
     }
 
     public List<AlertaFraude> listarTodos() {
