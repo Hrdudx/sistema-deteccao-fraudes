@@ -38,8 +38,18 @@ export interface TransacaoApi {
   statusTransacao?: string | null;
 }
 
-export interface AlertaFraudeApi {
+// Campo ainda inexistente no backend; previsto para o cálculo de SLA (RN14).
+interface ComPrazoSla {
+  prazoSla?: string | null;
+}
+
+export interface TransacaoRefApi {
+  idTransacao: string;
+}
+
+export interface AlertaFraudeApi extends ComPrazoSla {
   idAlertaFraude: string;
+  transacao?: TransacaoRefApi | null;
   dataAlerta: string;
   clienteOrigem?: ClienteApi | null;
   tipoFraude?: string | null;
@@ -53,8 +63,9 @@ export interface AlertaFraudeApi {
   observacao?: string | null;
 }
 
-export interface AlertaPldApi {
+export interface AlertaPldApi extends ComPrazoSla {
   idAlertaPld: string;
+  transacaoReferencia?: TransacaoRefApi | null;
   dataAlerta: string;
   clienteAnalisado?: ClienteApi | null;
   tipoAlerta?: string | null;
@@ -68,8 +79,10 @@ export interface AlertaPldApi {
   observacao?: string | null;
 }
 
-export interface ChargebackApi {
+export interface ChargebackApi extends ComPrazoSla {
   idChargeback: string;
+  transacao?: TransacaoRefApi | null;
+  modalidade?: string | null;
   cliente?: ClienteApi | null;
   dataContestacao?: string | null;
   valorContestado?: number | null;
@@ -80,7 +93,7 @@ export interface ChargebackApi {
   dataResolucao?: string | null;
 }
 
-export interface KycApi {
+export interface KycApi extends ComPrazoSla {
   idKyc: string;
   cliente?: ClienteApi | null;
   dataAnalise?: string | null;

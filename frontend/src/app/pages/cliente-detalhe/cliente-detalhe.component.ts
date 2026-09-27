@@ -13,7 +13,7 @@ import {
 import { CabecalhoPaginaComponent } from '../../components/cabecalho-pagina/cabecalho-pagina.component';
 import { BadgeRiscoComponent } from '../../components/badge-risco/badge-risco.component';
 import { EstadoListaComponent } from '../../components/estado-lista/estado-lista.component';
-import { formatarRotulo } from '../../utils/formatacao';
+import { ROTULOS_SITUACAO, formatarRotulo, situacaoDoStatus } from '../../utils/formatacao';
 
 type Aba = 'ocorrencias' | 'transacoes' | 'contas';
 
@@ -66,6 +66,10 @@ export class ClienteDetalheComponent implements OnChanges {
 
   rotulo(valor: string | null | undefined): string {
     return formatarRotulo(valor);
+  }
+
+  situacao(status: string | null): string {
+    return ROTULOS_SITUACAO[situacaoDoStatus(status)];
   }
 
   tipoPessoa(tipo: string | null | undefined): string {

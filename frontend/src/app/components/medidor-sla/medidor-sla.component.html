@@ -1,0 +1,34 @@
+<div class="medidor">
+  <svg
+    viewBox="0 0 200 116"
+    role="img"
+    [attr.aria-label]="'SLA dentro do prazo: ' + percentual(sla.dentroPrazo) + '%. Dentro do prazo ' + sla.dentroPrazo + ', atenção ' + sla.atencao + ', vencidos ' + sla.vencidas + '.'"
+  >
+    <path d="M 20 100 A 80 80 0 0 1 180 100" class="trilha" />
+    @for (arco of arcos; track arco.chave) {
+      @if (arco.visivel) {
+        <path
+          d="M 20 100 A 80 80 0 0 1 180 100"
+          class="faixa"
+          [attr.stroke]="arco.cor"
+          [attr.stroke-dasharray]="arco.traco"
+          [attr.stroke-dashoffset]="arco.deslocamento"
+        >
+          <title>{{ arco.rotulo }}: {{ sla[arco.chave] | number }}</title>
+        </path>
+      }
+    }
+    <text x="100" y="88" text-anchor="middle" class="percentual">{{ percentual(sla.dentroPrazo) }}%</text>
+    <text x="100" y="108" text-anchor="middle" class="legenda-centro">SLA dentro do prazo</text>
+  </svg>
+
+  <div class="cartoes">
+    @for (f of faixas; track f.chave) {
+      <div class="cartao">
+        <span class="titulo"><span class="ponto" [style.background]="f.cor" aria-hidden="true"></span>{{ f.rotulo }}</span>
+        <strong>{{ sla[f.chave] | number }}</strong>
+        <small>{{ percentual(sla[f.chave]) }}%</small>
+      </div>
+    }
+  </div>
+</div>

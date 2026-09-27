@@ -34,7 +34,7 @@
       <dl class="grade-dados">
         <div><dt>Tipo de cliente</dt><dd>{{ tipoPessoa(h.cliente.tipoPessoa) }}</dd></div>
         <div><dt>Situação</dt><dd>{{ rotulo(h.cliente.statusCliente) }}</dd></div>
-        <div><dt>Segmento</dt><dd>{{ h.cliente.segmento ?? '—' }}</dd></div>
+        <div><dt>Segmento</dt><dd>{{ rotulo(h.cliente.segmento) }}</dd></div>
         <div><dt>Cidade/UF</dt><dd>{{ h.cliente.cidade ?? '—' }}{{ h.cliente.uf ? '/' + h.cliente.uf : '' }}</dd></div>
         <div><dt>Profissão / atividade</dt><dd>{{ h.cliente.profissaoAtividade ?? '—' }}</dd></div>
         <div>
@@ -42,7 +42,7 @@
           <dd>{{ h.cliente.rendaFaturamentoMensal != null ? (h.cliente.rendaFaturamentoMensal | currency) : '—' }}</dd>
         </div>
         <div><dt>Cliente desde</dt><dd>{{ h.cliente.dataCadastro ? (h.cliente.dataCadastro | date: 'dd/MM/yyyy') : '—' }}</dd></div>
-        <div><dt>Origem do cadastro</dt><dd>{{ h.cliente.origemCadastro ?? '—' }}</dd></div>
+        <div><dt>Origem do cadastro</dt><dd>{{ rotulo(h.cliente.origemCadastro) }}</dd></div>
       </dl>
     </section>
 
@@ -96,7 +96,7 @@
                   <th scope="col" class="numero">Valor</th>
                   <th scope="col">Risco</th>
                   <th scope="col">Data</th>
-                  <th scope="col">Status</th>
+                  <th scope="col">Situação</th>
                   <th scope="col">Resultado</th>
                 </tr>
               </thead>
@@ -105,11 +105,11 @@
                   <tr>
                     <td class="id">#{{ o.id }}</td>
                     <td>{{ o.categoria }}</td>
-                    <td>{{ o.tipo }}</td>
+                    <td>{{ rotulo(o.tipo) }}</td>
                     <td class="numero">{{ o.valor !== null ? (o.valor | currency) : '—' }}</td>
                     <td><app-badge-risco [valor]="o.risco"></app-badge-risco></td>
                     <td>{{ o.data ? (o.data | date: 'dd/MM/yyyy') : '—' }}</td>
-                    <td>{{ rotulo(o.status) }}</td>
+                    <td [title]="'Status na origem: ' + rotulo(o.status)">{{ situacao(o.status) }}</td>
                     <td>{{ rotulo(o.resultado) }}</td>
                   </tr>
                 }
@@ -141,8 +141,8 @@
                   <tr>
                     <td class="id">{{ t.idTransacao }}</td>
                     <td>{{ t.dataHoraTransacao ? (t.dataHoraTransacao | date: 'dd/MM/yyyy HH:mm') : '—' }}</td>
-                    <td>{{ t.tipoTransacao ?? '—' }}</td>
-                    <td>{{ t.canal ?? '—' }}</td>
+                    <td>{{ rotulo(t.tipoTransacao) }}</td>
+                    <td>{{ rotulo(t.canal) }}</td>
                     <td>{{ t.nomeContraparte ?? '—' }}</td>
                     <td class="numero">{{ t.valor != null ? (t.valor | currency) : '—' }}</td>
                     <td>{{ t.scoreTransacao ?? '—' }}</td>
@@ -174,7 +174,7 @@
                 @for (c of h.contas; track c.idConta) {
                   <tr>
                     <td class="id">{{ c.idConta }}</td>
-                    <td>{{ c.tipoConta ?? '—' }}</td>
+                    <td>{{ rotulo(c.tipoConta) }}</td>
                     <td>{{ c.dataAbertura ? (c.dataAbertura | date: 'dd/MM/yyyy') : '—' }}</td>
                     <td>{{ rotulo(c.statusConta) }}</td>
                     <td class="numero">{{ c.limiteTransacionalDiario != null ? (c.limiteTransacionalDiario | currency) : '—' }}</td>

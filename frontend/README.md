@@ -17,7 +17,10 @@ frontend/
 ├── src/
 │   ├── app/
 │   │   ├── components/
-│   │   │   ├── sidebar/            # Navegação lateral (menu principal, gaveta no celular)
+│   │   │   ├── sidebar/            # Navegação lateral com ícones (gaveta no celular)
+│   │   │   ├── grafico-rosca/      # Gráfico de rosca em SVG (tipo, status, prioridade)
+│   │   │   ├── medidor-sla/        # Medidor semicircular do SLA geral
+│   │   │   ├── icone/              # Ícones SVG próprios (sem biblioteca externa)
 │   │   │   ├── cabecalho-pagina/   # Título/subtítulo/ações padrão das telas
 │   │   │   ├── badge-risco/        # Selo colorido de risco/prioridade
 │   │   │   └── estado-lista/       # Carregando / erro com "tentar novamente" / vazio
@@ -30,6 +33,7 @@ frontend/
 │   │   │   ├── em-construcao/      # Relatórios e Usuários (ainda sem tela)
 │   │   │   └── nao-encontrada/     # 404
 │   │   ├── services/               # Home, Ocorrências, Clientes e Auth (API + fallback)
+│   │   │   └── dados-demonstracao.ts  # Base fictícia no formato do dicionário de dados
 │   │   ├── models/                 # Contratos da API e modelos das telas
 │   │   ├── utils/formatacao.ts     # Padroniza risco/status vindos do backend
 │   │   └── app.routes.ts           # Rotas (lazy loading + título da aba)
@@ -81,8 +85,27 @@ Testes unitários: `ng test`.
 | Clientes | `GET /api/clientes`, `GET /api/clientes/{id}/historico` |
 | Login | `POST /api/auth/login` |
 
-Quando a API não responde, cada tela mostra **dados de demonstração** (iguais ao
-protótipo) com um aviso visível, para a apresentação não depender do backend no ar.
+Quando a API não responde, cada tela mostra **dados de demonstração** com um aviso
+visível, para a apresentação não depender do backend no ar. A base de demonstração
+(245 clientes e 156 ocorrências) segue o dicionário de dados — códigos `CLI0001`,
+`PLDALT…`, `FRDALT…`, `CBK…`, `KYC…`, severidade `MEDIA/ALTA/CRITICA`, status
+`ABERTO/EM_ANALISE/FECHADO`, origem `APP/WEB` — e as regras RN01–RN08.
+
+## Home (modelo aprovado pela equipe)
+
+- **Cards:** clientes cadastrados, ocorrências abertas, tratativas em andamento,
+  tratativas concluídas e riscos identificados (alto/crítico) no período. Cada card
+  abre a tela correspondente já filtrada.
+- **Gráficos:** ocorrências por tipo, status (Pendente / Em tratativa / Concluída —
+  RN10), SLA geral, SLA por tipo e ocorrências por prioridade.
+- **Resumo do mês** em primeiro e **Resumo do dia** abaixo (DMS 9.2 / RF12–RF13), com
+  filtro de período (RF15).
+- **SLA:** o dicionário de dados ainda não tem prazo de SLA por ocorrência. A Home já
+  calcula o SLA quando o backend enviar o campo `prazoSla`; até lá mostra
+  "SLA ainda indisponível" com dados reais (a demonstração simula prazos).
+- **Categorias:** somente PLD, Chargeback, KYC e Fraude. O modelo visual trazia
+  "Movimentações" e "Transacional", mas o DRE (RN07/RN08) e o DMS (9.4) proíbem essas
+  categorias — por isso ficaram de fora.
 
 A URL base da API é configurada em `src/environments/environment.ts` (`apiUrl`).
 
@@ -96,11 +119,13 @@ A URL base da API é configurada em `src/environments/environment.ts` (`apiUrl`)
 
 ### Sprint 4 — finalização das telas e ajustes de usabilidade
 - [x] Home integrada ao backend (indicadores calculados das ocorrências reais)
-- [x] Fila central de Ocorrências (MVP): abas por categoria, busca por cliente/CPF/CNPJ/ID, filtros de risco, situação e período, paginação e painel de detalhe
+- [x] Fila central de Ocorrências (MVP): abas por categoria, busca por cliente/CPF/CNPJ/ID, filtros de risco, situação (Pendente / Em tratativa / Concluída) e período, paginação e painel de detalhe
 - [x] Telas de Clientes: consulta com filtros e histórico do cliente (ocorrências, transações, contas e risco consolidado)
 - [x] Tela de Login integrada à US01 e nome/perfil do usuário no menu
 - [x] Páginas "em construção" (Relatórios, Usuários) e 404 — nenhum link do menu leva mais a tela em branco
-- [x] Padrão visual único: fonte Inter, cores, cartões, tabelas com cabeçalho, selos de risco
+- [x] Home refeita no modelo aprovado: cards com ícones, gráficos de rosca, medidor de SLA, SLA por tipo, prioridade e resumo do dia
+- [x] Menu lateral claro com ícones e barra superior com menu do usuário (perfil / sair), como no modelo
+- [x] Padrão visual único: fonte Inter, cores validadas para daltonismo, cartões, tabelas com cabeçalho, selos de risco
 - [x] Formatos brasileiros (R$ 48.900,00 e dd/MM/aaaa) e textos com acento ("Média", "Em análise")
 - [x] Estados de carregando, erro com "Tentar novamente" e lista vazia em todas as telas
 - [x] Layout responsivo (menu vira gaveta no celular) e acessibilidade (teclado, foco visível, `aria-*`, "pular para o conteúdo")

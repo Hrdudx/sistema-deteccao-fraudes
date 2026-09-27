@@ -7,9 +7,20 @@ import { OcorrenciasService } from '../../services/ocorrencias.service';
 import { CabecalhoPaginaComponent } from '../../components/cabecalho-pagina/cabecalho-pagina.component';
 import { BadgeRiscoComponent } from '../../components/badge-risco/badge-risco.component';
 import { EstadoListaComponent } from '../../components/estado-lista/estado-lista.component';
-import { NivelRisco, PESO_RISCO, formatarRotulo, normalizarRisco, semAcento, statusEncerrado } from '../../utils/formatacao';
+import {
+  NivelRisco,
+  PESO_RISCO,
+  ROTULOS_SITUACAO,
+  Situacao,
+  formatarRotulo,
+  normalizarRisco,
+  paraData,
+  semAcento,
+  situacaoDoStatus,
+} from '../../utils/formatacao';
 
-type FiltroSituacao = 'abertas' | 'encerradas' | 'todas';
+// Estados do DRE (RF18/RN10) + atalhos "Em aberto" (pendente + em tratativa) e "Todas".
+type FiltroSituacao = 'abertas' | Situacao | 'todas';
 type FiltroPeriodo = 'hoje' | '7' | '30' | 'todos';
 
 const ITENS_POR_PAGINA = 15;
@@ -36,6 +47,7 @@ export class OcorrenciasComponent implements OnInit {
   readonly categorias = CATEGORIAS_OCORRENCIA;
   readonly niveis: NivelRisco[] = ['critico', 'alto', 'medio', 'baixo'];
   readonly rotulosNivel: Record<NivelRisco, string> = { critico: 'Crítico', alto: 'Alto', medio: 'Médio', baixo: 'Baixo' };
+  readonly situacoes = Object.entries(ROTULOS_SITUACAO) as [Situacao, string][];
 
   categoria: CategoriaOcorrencia | null = null;
 
@@ -46,7 +58,7 @@ export class OcorrenciasComponent implements OnInit {
 
   // Filtros
   busca = '';
-  risco: NivelRisco | '' = '';
+  risco: NivelRisco | 'altoOuCritico' | '' = '';
   situacao: FiltroSituacao = 'abertas';
   periodo: FiltroPeriodo = 'todos';
 
@@ -63,6 +75,13 @@ export class OcorrenciasComponent implements OnInit {
       this.categoria = (dados['categoria'] as CategoriaOcorrencia | undefined) ?? null;
       this.selecionada = null;
       this.pagina = 1;
+    });
+    // Filtros vindos dos cards da Home (ex.: ?situacao=emTratativa, ?risco=alto)
+    this.route.queryParamMap.subscribe((params) => {
+      const situacao = params.get('situacao') as FiltroSituacao | null;
+      if (situacao && ['abertas', 'pendente', 'emTratativa', 'concluida', 'todas'].includes(situacao)) this.situacao = situacao;
+      const risco = params.get('risco');
+      if (risco === 'altoOuCritico' || this.niveis.includes(risco as NivelRisco)) this.risco = risco as NivelRisco | 'altoOuCritico';
     });
     this.carregar();
   }
@@ -95,7 +114,8 @@ export class OcorrenciasComponent implements OnInit {
 
   // Totais em aberto por categoria, exibidos nas abas.
   totalAbertas(categoria: CategoriaOcorrencia | null): number {
-    return this.todas.filter((o) => (!categoria || o.categoria === categoria) && !statusEncerrado(o.status)).length;
+    return this.todas.filter((o) => (!categoria || o.categoria === categoria) && situacaoDoStatus(o.status) !== 'concluida')
+      .length;
   }
 
   get filtradas(): Ocorrencia[] {
@@ -106,10 +126,16 @@ export class OcorrenciasComponent implements OnInit {
       .filter((o) => !this.categoria || o.categoria === this.categoria)
       .filter((o) => {
         if (this.situacao === 'todas') return true;
-        return this.situacao === 'encerradas' ? statusEncerrado(o.status) : !statusEncerrado(o.status);
+        const situacao = situacaoDoStatus(o.status);
+        return this.situacao === 'abertas' ? situacao !== 'concluida' : situacao === this.situacao;
       })
-      .filter((o) => !this.risco || normalizarRisco(o.risco) === this.risco)
-      .filter((o) => !limite || (!!o.data && new Date(o.data) >= limite))
+      .filter((o) => {
+        if (!this.risco) return true;
+        const nivel = normalizarRisco(o.risco);
+        // "Alto ou crítico" = atalho "Riscos identificados" da Home
+        return this.risco === 'altoOuCritico' ? nivel === 'alto' || nivel === 'critico' : nivel === this.risco;
+      })
+      .filter((o) => !limite || (!!o.data && paraData(o.data) >= limite))
       .filter((o) => {
         if (!termo) return true;
         const alvo = semAcento([o.id, o.cliente, o.documento ?? '', o.tipo].join(' ')).toLowerCase();
@@ -164,7 +190,11 @@ export class OcorrenciasComponent implements OnInit {
   }
 
   encerrada(o: Ocorrencia): boolean {
-    return statusEncerrado(o.status);
+    return situacaoDoStatus(o.status) === 'concluida';
+  }
+
+  situacaoDe(o: Ocorrencia): string {
+    return ROTULOS_SITUACAO[situacaoDoStatus(o.status)];
   }
 
   private peso(o: Ocorrencia): number {

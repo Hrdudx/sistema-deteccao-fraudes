@@ -2,23 +2,44 @@
   <router-outlet></router-outlet>
 } @else {
   <a class="pular-conteudo" href="#conteudo">Pular para o conteúdo</a>
-  <div class="layout">
-    <app-sidebar [aberto]="menuAberto" (fechar)="menuAberto = false"></app-sidebar>
+  <div class="layout" [class.menu-recolhido]="menuRecolhido">
+    <app-sidebar [aberto]="menuAberto" (fechar)="menuAberto = false" (sair)="sair()"></app-sidebar>
     @if (menuAberto) {
       <div class="fundo-menu" (click)="menuAberto = false" aria-hidden="true"></div>
     }
     <div class="principal">
       <header class="barra-superior">
-        <button
-          type="button"
-          class="botao-menu"
-          (click)="menuAberto = !menuAberto"
-          [attr.aria-expanded]="menuAberto"
-          aria-label="Abrir menu"
-        >
-          ☰
+        <button type="button" class="botao-menu" (click)="alternarMenu()" aria-label="Mostrar ou ocultar o menu" [attr.aria-expanded]="menuAberto || !menuRecolhido">
+          <app-icone nome="menu" [tamanho]="24"></app-icone>
         </button>
-        <strong>SGR</strong>
+
+        <div class="usuario">
+          <button
+            type="button"
+            class="botao-usuario"
+            (click)="menuUsuarioAberto = !menuUsuarioAberto"
+            [attr.aria-expanded]="menuUsuarioAberto"
+            aria-haspopup="menu"
+          >
+            <app-icone nome="usuario" [tamanho]="28"></app-icone>
+            <span class="nome-perfil">{{ perfil }}</span>
+            <app-icone nome="seta" [tamanho]="16"></app-icone>
+          </button>
+          @if (menuUsuarioAberto) {
+            <div class="menu-usuario" role="menu">
+              @if (auth.usuario(); as u) {
+                <div class="dados-usuario">
+                  <strong>{{ u.nome }}</strong>
+                  <span>{{ u.email }}</span>
+                </div>
+                <button type="button" role="menuitem" (click)="sair()"><app-icone nome="sair" [tamanho]="18"></app-icone>Sair</button>
+              } @else {
+                <div class="dados-usuario"><span>Você não está autenticado.</span></div>
+                <a routerLink="/login" role="menuitem"><app-icone nome="usuario" [tamanho]="18"></app-icone>Entrar</a>
+              }
+            </div>
+          }
+        </div>
       </header>
       <main class="conteudo" id="conteudo" tabindex="-1">
         <router-outlet></router-outlet>

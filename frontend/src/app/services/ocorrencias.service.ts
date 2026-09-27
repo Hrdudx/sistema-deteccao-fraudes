@@ -5,6 +5,12 @@ import { environment } from '../../environments/environment';
 import { AlertaFraudeApi, AlertaPldApi, ChargebackApi, KycApi } from '../models/backend.model';
 import { CategoriaOcorrencia, Ocorrencia } from '../models/ocorrencia.model';
 import { ResultadoConsulta } from '../models/resultado-consulta.model';
+import {
+  ALERTAS_FRAUDE_DEMONSTRACAO,
+  ALERTAS_PLD_DEMONSTRACAO,
+  CHARGEBACKS_DEMONSTRACAO,
+  KYCS_DEMONSTRACAO,
+} from './dados-demonstracao';
 
 // Conversores de cada entidade do backend para o formato comum de Ocorrência.
 // Exportados porque a tela de Clientes reutiliza para montar o histórico.
@@ -21,6 +27,7 @@ export function pldParaOcorrencia(a: AlertaPldApi): Ocorrencia {
     status: a.statusAnalise ?? '—',
     data: a.dataAlerta ?? null,
     dataEncerramento: a.dataEncerramento ?? null,
+    prazoSla: a.prazoSla ?? null,
     score: a.scorePld ?? null,
     analista: a.analistaResponsavel ?? null,
     resultado: a.resultado ?? null,
@@ -41,6 +48,7 @@ export function fraudeParaOcorrencia(a: AlertaFraudeApi): Ocorrencia {
     status: a.statusAnalise ?? '—',
     data: a.dataAlerta ?? null,
     dataEncerramento: a.dataEncerramento ?? null,
+    prazoSla: a.prazoSla ?? null,
     score: a.scoreFraude ?? null,
     analista: a.analistaResponsavel ?? null,
     resultado: a.resultado ?? null,
@@ -57,11 +65,12 @@ export function chargebackParaOcorrencia(c: ChargebackApi): Ocorrencia {
     documento: c.cliente?.documentoFicticio ?? null,
     tipo: c.motivoChargeback ?? 'Chargeback',
     valor: c.valorContestado ?? null,
-    // O chargeback não possui campo de severidade no modelo de dados.
+    // O chargeback não possui campo de severidade no dicionário de dados.
     risco: null,
     status: c.statusChargeback ?? '—',
     data: c.dataContestacao ?? null,
     dataEncerramento: c.dataResolucao ?? null,
+    prazoSla: c.prazoSla ?? null,
     score: null,
     analista: null,
     resultado: c.resultadoInvestigacao ?? null,
@@ -81,7 +90,9 @@ export function kycParaOcorrencia(k: KycApi): Ocorrencia {
     risco: k.nivelRiscoKyc ?? null,
     status: k.statusKyc ?? '—',
     data: k.dataAnalise ?? null,
-    dataEncerramento: null,
+    // KYC não tem data de encerramento: a data da análise marca a decisão.
+    dataEncerramento: k.statusKyc && /APROVAD|REPROVAD/i.test(k.statusKyc) ? (k.dataAnalise ?? null) : null,
+    prazoSla: k.prazoSla ?? null,
     score: k.scoreKyc ?? null,
     analista: null,
     resultado: null,
@@ -122,27 +133,10 @@ export class OcorrenciasService {
   }
 }
 
-// Dados de demonstração (mesmos exemplos do protótipo de telas), usados quando o
-// backend não está rodando — a apresentação da sprint não depende da API no ar.
-const hoje = new Date();
-const diasAtras = (dias: number, hora = 10) => {
-  const d = new Date(hoje);
-  d.setDate(d.getDate() - dias);
-  d.setHours(hora, 14, 0, 0);
-  return d.toISOString();
-};
-
-const base = { dataEncerramento: null, documento: null, score: null, analista: null, resultado: null, observacao: null };
-
+// Ocorrências de demonstração, convertidas pelos mesmos conversores usados com a API real.
 export const OCORRENCIAS_DEMONSTRACAO: Ocorrencia[] = [
-  { ...base, id: 'PLD-1028', categoria: 'PLD', clienteId: 'CLI-0001', cliente: 'Mariana Alves de Souza', documento: '***.***.***-42', tipo: 'Movimentação atípica', valor: 48900, risco: 'Alto', status: 'Aguardando tratativa', data: diasAtras(0, 9), score: 82, observacao: 'Valor acima do padrão recente do cliente.' },
-  { ...base, id: 'PLD-1027', categoria: 'PLD', clienteId: 'CLI-0002', cliente: 'Rafael Nunes', tipo: 'Perfil incompatível', valor: 31200, risco: 'Médio', status: 'Em análise', data: diasAtras(0, 8), score: 64, analista: 'Equipe de Riscos' },
-  { ...base, id: 'CB-0892', categoria: 'Chargeback', clienteId: 'CLI-0003', cliente: 'Empresa Delta Ltda.', tipo: 'Compra não reconhecida', valor: 7450, risco: null, status: 'Aguardando tratativa', data: diasAtras(1) },
-  { ...base, id: 'KYC-0441', categoria: 'KYC', clienteId: 'CLI-0004', cliente: 'João Martins', tipo: 'Verificação cadastral (KYC)', valor: null, risco: 'Médio', status: 'Pendente', data: diasAtras(2), score: 55, observacao: 'Comprovante de endereço divergente.' },
-  { ...base, id: 'FR-0770', categoria: 'Fraude', clienteId: 'CLI-0005', cliente: 'Camila Rocha', tipo: 'Conta laranja', valor: 12980, risco: 'Crítico', status: 'Aguardando tratativa', data: diasAtras(0, 11), score: 95 },
-  { ...base, id: 'PLD-1019', categoria: 'PLD', clienteId: 'CLI-0006', cliente: 'Lucas Ferreira', tipo: 'Perfil incompatível', valor: 26700, risco: 'Alto', status: 'Concluída', data: diasAtras(9), resultado: 'Procedente', analista: 'Equipe de Riscos', observacao: 'Movimentação incompatível com o perfil recente e sem justificativa suficiente.' },
-  { ...base, id: 'PLD-1015', categoria: 'PLD', clienteId: 'CLI-0007', cliente: 'Ana Ribeiro', tipo: 'Movimentação atípica', valor: 14300, risco: 'Médio', status: 'Concluída', data: diasAtras(9), resultado: 'Improcedente' },
-  { ...base, id: 'FR-0765', categoria: 'Fraude', clienteId: 'CLI-0008', cliente: 'Comercial Alfa Ltda.', tipo: 'Engenharia social', valor: 92500, risco: 'Alto', status: 'Em análise', data: diasAtras(4), score: 88 },
-  { ...base, id: 'CB-0887', categoria: 'Chargeback', clienteId: 'CLI-0009', cliente: 'Bruno Costa', tipo: 'Produto não entregue', valor: 8900, risco: null, status: 'Resolvido', data: diasAtras(20), resultado: 'Estornado' },
-  { ...base, id: 'KYC-0438', categoria: 'KYC', clienteId: 'CLI-0010', cliente: 'Patrícia Gomes', tipo: 'Verificação cadastral (KYC)', valor: null, risco: 'Baixo', status: 'Aprovado', data: diasAtras(12), score: 18 },
+  ...ALERTAS_PLD_DEMONSTRACAO.map(pldParaOcorrencia),
+  ...CHARGEBACKS_DEMONSTRACAO.map(chargebackParaOcorrencia),
+  ...KYCS_DEMONSTRACAO.map(kycParaOcorrencia),
+  ...ALERTAS_FRAUDE_DEMONSTRACAO.map(fraudeParaOcorrencia),
 ];

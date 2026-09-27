@@ -1,20 +1,21 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, catchError, map, of, switchMap } from 'rxjs';
+import { Observable, catchError, forkJoin, map } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { IndicadoresHome, ResumoOcorrencia } from '../models/indicadores-home.model';
-import { Ocorrencia } from '../models/ocorrencia.model';
+import { ContagemSla, IndicadoresHome, PeriodoHome, SlaPorTipo } from '../models/indicadores-home.model';
+import { CATEGORIAS_OCORRENCIA, Ocorrencia } from '../models/ocorrencia.model';
 import { ResultadoConsulta } from '../models/resultado-consulta.model';
-import { NivelRisco, PESO_RISCO, normalizarRisco, statusEncerrado } from '../utils/formatacao';
+import { normalizarRisco, paraData, situacaoDoStatus } from '../utils/formatacao';
+import { ClientesService } from './clientes.service';
 import { OcorrenciasService } from './ocorrencias.service';
 
 // Serviço Angular equivalente à camada de "Controle" do backend.
 // O Angular NUNCA acessa o Databricks diretamente, só o backend (regra do DMS, seção 3.2).
 //
 // Ordem de busca dos indicadores (Sprint 4 — integração):
-//   1. GET /api/home/indicadores (endpoint agregado, quando o backend expuser);
-//   2. senão, calcula a partir das ocorrências reais (PLD, Chargeback, KYC, Fraude);
-//   3. se a API estiver fora do ar, usa os dados de demonstração do protótipo.
+//   1. GET /api/home/indicadores?periodo=... (endpoint agregado previsto no DRE);
+//   2. senão, monta os indicadores a partir das listas reais de ocorrências e clientes;
+//   3. se a API estiver fora do ar, usa a base de demonstração (mesmo cálculo).
 @Injectable({ providedIn: 'root' })
 export class HomeService {
   private readonly baseUrl = `${environment.apiUrl}/home`;
@@ -22,100 +23,130 @@ export class HomeService {
   constructor(
     private http: HttpClient,
     private ocorrenciasService: OcorrenciasService,
+    private clientesService: ClientesService,
   ) {}
 
-  obterIndicadores(): Observable<ResultadoConsulta<IndicadoresHome>> {
-    return this.http.get<IndicadoresHome>(`${this.baseUrl}/indicadores`).pipe(
+  obterIndicadores(periodo: PeriodoHome): Observable<ResultadoConsulta<IndicadoresHome>> {
+    return this.http.get<IndicadoresHome>(`${this.baseUrl}/indicadores`, { params: { periodo } }).pipe(
       map((dados) => ({ dados, demonstracao: false })),
       catchError(() =>
-        this.ocorrenciasService.listar().pipe(
-          map((resultado) =>
-            resultado.demonstracao
-              ? { dados: INDICADORES_DEMONSTRACAO, demonstracao: true }
-              : { dados: calcularIndicadores(resultado.dados), demonstracao: false },
-          ),
+        forkJoin([this.ocorrenciasService.listar(), this.clientesService.listar()]).pipe(
+          map(([ocorrencias, clientes]) => ({
+            dados: calcularIndicadores(ocorrencias.dados, clientes.dados.length, periodo),
+            demonstracao: ocorrencias.demonstracao,
+          })),
         ),
       ),
     );
   }
 }
 
-const PRIORIDADE: Record<NivelRisco, ResumoOcorrencia['prioridade']> = {
-  critico: 'Critica',
-  alto: 'Alta',
-  medio: 'Media',
-  baixo: 'Baixa',
-};
-
-export function calcularIndicadores(ocorrencias: Ocorrencia[], agora = new Date()): IndicadoresHome {
-  const abertas = ocorrencias.filter((o) => !statusEncerrado(o.status));
-  const mesmoDia = (iso: string | null) => !!iso && new Date(iso).toDateString() === agora.toDateString();
-  const mesmoMes = (iso: string | null) => {
-    if (!iso) return false;
-    const d = new Date(iso);
-    return d.getMonth() === agora.getMonth() && d.getFullYear() === agora.getFullYear();
-  };
-  const peso = (o: Ocorrencia) => {
-    const n = normalizarRisco(o.risco);
-    return n ? PESO_RISCO[n] : 0;
-  };
-  const paraResumo = (o: Ocorrencia): ResumoOcorrencia => {
-    const n = normalizarRisco(o.risco);
-    return {
-      id: o.id,
-      prioridade: n ? PRIORIDADE[n] : 'Baixa',
-      ocorrencia: o.categoria,
-      cliente: o.cliente,
-      valor: o.valor,
-      slaRestante: null,
-    };
-  };
-  const ordenar = (lista: Ocorrencia[]) => [...lista].sort((a, b) => peso(b) - peso(a));
-  const contar = (categoria: Ocorrencia['categoria']) => abertas.filter((o) => o.categoria === categoria).length;
-
-  return {
-    ocorrenciasAbertas: abertas.length,
-    ocorrenciasCriticas: abertas.filter((o) => normalizarRisco(o.risco) === 'critico').length,
-    ocorrenciasAltas: abertas.filter((o) => normalizarRisco(o.risco) === 'alto').length,
-    tratativasConcluidasHoje: ocorrencias.filter((o) => statusEncerrado(o.status) && mesmoDia(o.dataEncerramento))
-      .length,
-    slaPercentualDentroPrazo: null,
-    slaVencidas: null,
-    ocorrenciasPorTipo: {
-      PLD: contar('PLD'),
-      Chargeback: contar('Chargeback'),
-      KYC: contar('KYC'),
-      Fraude: contar('Fraude'),
-    },
-    resumoDoMes: ordenar(abertas.filter((o) => mesmoMes(o.data))).slice(0, 5).map(paraResumo),
-    resumoDoDia: ordenar(abertas.filter((o) => mesmoDia(o.data))).slice(0, 5).map(paraResumo),
-  };
+export function inicioDoPeriodo(periodo: PeriodoHome, agora = new Date()): Date | null {
+  if (periodo === 'todos') return null;
+  const inicio = new Date(agora);
+  inicio.setHours(0, 0, 0, 0);
+  if (periodo === 'mes') inicio.setDate(1);
+  else inicio.setDate(inicio.getDate() - Number(periodo));
+  return inicio;
 }
 
-// Dados de demonstração, iguais ao protótipo da Home.
-const INDICADORES_DEMONSTRACAO: IndicadoresHome = {
-  ocorrenciasAbertas: 128,
-  ocorrenciasCriticas: 12,
-  ocorrenciasAltas: 37,
-  tratativasConcluidasHoje: 94,
-  slaPercentualDentroPrazo: 87,
-  slaVencidas: 17,
-  ocorrenciasPorTipo: {
-    PLD: 52,
-    Chargeback: 31,
-    KYC: 24,
-    Fraude: 21,
-  },
-  resumoDoMes: [
-    { id: 'FR-0770', prioridade: 'Critica', ocorrencia: 'Fraude', cliente: 'Camila Rocha', valor: 12980, slaRestante: '00h 34m' },
-    { id: 'PLD-1028', prioridade: 'Alta', ocorrencia: 'PLD', cliente: 'Mariana Alves', valor: 48900, slaRestante: '01h 12m' },
-    { id: 'FR-0765', prioridade: 'Alta', ocorrencia: 'Fraude', cliente: 'Comercial Alfa Ltda.', valor: 92500, slaRestante: '06h 10m' },
-    { id: 'CB-0892', prioridade: 'Media', ocorrencia: 'Chargeback', cliente: 'Empresa Delta Ltda.', valor: 7450, slaRestante: '03h 40m' },
-    { id: 'KYC-0441', prioridade: 'Media', ocorrencia: 'KYC', cliente: 'João Martins', valor: null, slaRestante: '05h 18m' },
-  ],
-  resumoDoDia: [
-    { id: 'FR-0770', prioridade: 'Critica', ocorrencia: 'Fraude', cliente: 'Camila Rocha', valor: 12980, slaRestante: '00h 34m' },
-    { id: 'PLD-1028', prioridade: 'Alta', ocorrencia: 'PLD', cliente: 'Mariana Alves', valor: 48900, slaRestante: '01h 12m' },
-    { id: 'CB-0892', prioridade: 'Media', ocorrencia: 'Chargeback', cliente: 'Empresa Delta Ltda.', valor: 7450, slaRestante: '03h 40m' },
-  ],
-};
+// Faixa "atenção" do SLA: ocorrência em aberto a menos de 24h do prazo.
+const HORAS_ATENCAO = 24;
+
+function situacaoSla(o: Ocorrencia, agora: Date): keyof ContagemSla | null {
+  if (!o.prazoSla) return null;
+  const prazo = paraData(o.prazoSla).getTime();
+  if (situacaoDoStatus(o.status) === 'concluida') {
+    const fim = o.dataEncerramento ? paraData(o.dataEncerramento).getTime() : prazo;
+    // Encerramento só tem a data (sem hora): compara com o fim do dia do prazo
+    const fimDoDiaPrazo = paraData(o.prazoSla);
+    fimDoDiaPrazo.setHours(23, 59, 59, 999);
+    return fim <= fimDoDiaPrazo.getTime() ? 'dentroPrazo' : 'vencidas';
+  }
+  const restante = prazo - agora.getTime();
+  if (restante < 0) return 'vencidas';
+  return restante <= HORAS_ATENCAO * 3600000 ? 'atencao' : 'dentroPrazo';
+}
+
+function contarSla(lista: Ocorrencia[], agora: Date): ContagemSla {
+  const contagem: ContagemSla = { dentroPrazo: 0, atencao: 0, vencidas: 0 };
+  for (const o of lista) {
+    const s = situacaoSla(o, agora);
+    if (s) contagem[s]++;
+  }
+  return contagem;
+}
+
+export function calcularIndicadores(
+  ocorrencias: Ocorrencia[],
+  clientesCadastrados: number | null,
+  periodo: PeriodoHome = 'mes',
+  agora = new Date(),
+): IndicadoresHome {
+  const inicio = inicioDoPeriodo(periodo, agora);
+  const noPeriodo = (iso: string | null) => !inicio || (!!iso && paraData(iso) >= inicio);
+  const hojeInicio = new Date(agora);
+  hojeInicio.setHours(0, 0, 0, 0);
+  const ehHoje = (iso: string | null) => !!iso && paraData(iso) >= hojeInicio && paraData(iso) <= agora;
+
+  const situacao = (o: Ocorrencia) => situacaoDoStatus(o.status);
+  const doPeriodo = ocorrencias.filter((o) => noPeriodo(o.data));
+  const abertas = ocorrencias.filter((o) => situacao(o) !== 'concluida');
+  const concluidas = ocorrencias.filter((o) => situacao(o) === 'concluida');
+
+  const porTipo = Object.fromEntries(
+    CATEGORIAS_OCORRENCIA.map((c) => [c, doPeriodo.filter((o) => o.categoria === c).length]),
+  ) as IndicadoresHome['ocorrenciasPorTipo'];
+
+  const prioridade = { critica: 0, alta: 0, media: 0, baixa: 0, semClassificacao: 0 };
+  for (const o of doPeriodo) {
+    const n = normalizarRisco(o.risco);
+    if (n === 'critico') prioridade.critica++;
+    else if (n === 'alto') prioridade.alta++;
+    else if (n === 'medio') prioridade.media++;
+    else if (n === 'baixo') prioridade.baixa++;
+    else prioridade.semClassificacao++;
+  }
+
+  // SLA só é exibido quando a base informa prazos (campo prazoSla).
+  const comPrazo = doPeriodo.filter((o) => !!o.prazoSla);
+  const temSla = comPrazo.length > 0;
+  const slaPorTipo: SlaPorTipo[] = CATEGORIAS_OCORRENCIA.map((tipo) => {
+    const lista = comPrazo.filter((o) => o.categoria === tipo);
+    return { tipo, total: lista.length, ...contarSla(lista, agora) };
+  });
+  const abertasComPrazo = abertas.filter((o) => !!o.prazoSla);
+
+  return {
+    clientesCadastrados,
+    ocorrenciasAbertas: abertas.length,
+    tratativasEmAndamento: abertas.filter((o) => situacao(o) === 'emTratativa').length,
+    tratativasConcluidasPeriodo: concluidas.filter((o) => noPeriodo(o.dataEncerramento ?? o.data)).length,
+    riscosIdentificadosPeriodo: doPeriodo.filter((o) => {
+      const n = normalizarRisco(o.risco);
+      return n === 'critico' || n === 'alto';
+    }).length,
+    ocorrenciasPorTipo: porTipo,
+    ocorrenciasPorStatus: {
+      pendente: doPeriodo.filter((o) => situacao(o) === 'pendente').length,
+      emTratativa: doPeriodo.filter((o) => situacao(o) === 'emTratativa').length,
+      concluida: doPeriodo.filter((o) => situacao(o) === 'concluida').length,
+    },
+    ocorrenciasPorPrioridade: prioridade,
+    sla: temSla ? contarSla(comPrazo, agora) : null,
+    slaPorTipo: temSla ? slaPorTipo : null,
+    resumoDoDia: {
+      novasOcorrencias: ocorrencias.filter((o) => ehHoje(o.data)).length,
+      // Ainda não há registro de início de tratativa (fato_tratativa_ocorrencia) na API.
+      tratativasIniciadas: null,
+      tratativasConcluidas: concluidas.filter((o) => ehHoje(o.dataEncerramento)).length,
+      slaVencendoHoje: abertasComPrazo.length
+        ? abertasComPrazo.filter((o) => {
+            const prazo = paraData(o.prazoSla!);
+            return prazo >= agora && prazo.toDateString() === agora.toDateString();
+          }).length
+        : null,
+      slaVencidos: abertasComPrazo.length ? abertasComPrazo.filter((o) => paraData(o.prazoSla!) < agora).length : null,
+    },
+  };
+}

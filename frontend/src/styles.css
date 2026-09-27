@@ -14,8 +14,10 @@
   --cor-texto-suave: #475569;
   --cor-texto-fraco: #64748b;
 
-  --cor-menu: #0f172a;
-  --cor-menu-hover: #1e293b;
+  /* Menu lateral claro (modelo aprovado pela equipe) */
+  --cor-menu: #ffffff;
+  --cor-menu-hover: #f1f5f9;
+  --cor-menu-ativo: #eaf1fe;
 
   --cor-primaria: #1d4ed8;
   --cor-primaria-hover: #1e40af;
@@ -30,6 +32,30 @@
   --cor-baixo: #15803d;
   --cor-baixo-fundo: #f0fdf4;
   --cor-neutro-fundo: #f1f5f9;
+
+  /* Cores de dados — validadas para daltonismo (scripts do guia de dataviz).
+     A cor acompanha a entidade em todas as telas. */
+  --serie-pld: #2563eb;
+  --serie-chargeback: #ea8a1a;
+  --serie-kyc: #16a37f;
+  --serie-fraude: #8b5cf6;
+
+  --situacao-pendente: #d99a00;
+  --situacao-tratativa: #2563eb;
+  --situacao-concluida: #16a37f;
+
+  --prioridade-critica: #a61b1b;
+  --prioridade-alta: #e8590c;
+  --prioridade-media: #d4a000;
+  --prioridade-baixa: #15925a;
+
+  --sla-dentro: #15925a;
+  --sla-atencao: #d4a000;
+  --sla-vencido: #c81e1e;
+  /* Versões escuras para texto (contraste AA sobre branco) */
+  --sla-dentro-texto: #15803d;
+  --sla-atencao-texto: #a16207;
+  --sla-vencido-texto: #b91c1c;
 
   --raio: 10px;
   --sombra: 0 1px 2px rgba(15, 23, 42, 0.04);
@@ -330,6 +356,150 @@ a {
 .aviso-erro {
   background: var(--cor-critico-fundo);
   color: var(--cor-critico);
+}
+
+/* ---------- Cartões de indicador com ícone ---------- */
+.kpi-icone {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  flex-shrink: 0;
+}
+
+.tom-azul {
+  background: #eaf1fe;
+  color: #2563eb;
+}
+
+.tom-verde {
+  background: #e8f7f0;
+  color: #15925a;
+}
+
+.tom-amarelo {
+  background: #fdf5e1;
+  color: #b7791f;
+}
+
+.tom-vermelho {
+  background: #fdecec;
+  color: #c81e1e;
+}
+
+.tom-roxo {
+  background: #f1edfe;
+  color: #6d4ed8;
+}
+
+.kpi-texto {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.kpi-texto > span {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--cor-texto);
+}
+
+.kpi-texto strong {
+  font-size: 1.6rem;
+  line-height: 1.25;
+}
+
+.kpi-texto small {
+  font-size: 0.8rem;
+  color: var(--cor-texto-fraco);
+}
+
+.botao-icone {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  border: none;
+  border-radius: 6px;
+  background: none;
+  color: var(--cor-texto-suave);
+  cursor: pointer;
+}
+
+.botao-icone:hover {
+  background: var(--cor-neutro-fundo);
+}
+
+.girando {
+  animation: girar 0.8s linear infinite;
+}
+
+@keyframes girar {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ---------- Tabela de SLA (Home) ---------- */
+.tipo {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--cor-texto);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.tipo:hover {
+  color: var(--cor-primaria);
+}
+
+.tipo-icone {
+  display: inline-flex;
+  padding: 4px;
+  border-radius: 50%;
+  background: var(--cor-neutro-fundo);
+}
+
+.texto-dentro {
+  color: var(--sla-dentro-texto);
+}
+
+.texto-atencao {
+  color: var(--sla-atencao-texto);
+}
+
+.texto-vencido {
+  color: var(--sla-vencido-texto);
+}
+
+.barra-sla {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 130px;
+}
+
+.barra-sla strong {
+  width: 38px;
+  font-size: 0.85rem;
+}
+
+.barra-sla .trilha {
+  flex: 1;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--cor-neutro-fundo);
+  overflow: hidden;
+}
+
+.barra-sla .trilha span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--sla-dentro);
 }
 
 /* ---------- Paginação e contadores ---------- */

@@ -21,6 +21,9 @@ export interface Ocorrencia {
   status: string;
   data: string | null;
   dataEncerramento: string | null;
+  // Prazo de SLA da ocorrência. O modelo de dados atual ainda não possui esse
+  // campo; quando o backend passar a enviá-lo, a Home calcula o SLA sozinha.
+  prazoSla?: string | null;
   score: number | null;
   analista: string | null;
   resultado: string | null;

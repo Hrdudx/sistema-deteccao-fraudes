@@ -41,6 +41,7 @@
       <label for="risco">Risco</label>
       <select id="risco" [(ngModel)]="risco" name="risco" (ngModelChange)="aoFiltrar()">
         <option value="">Todos</option>
+        <option value="altoOuCritico">Alto ou crítico</option>
         @for (nivel of niveis; track nivel) {
           <option [value]="nivel">{{ rotulosNivel[nivel] }}</option>
         }
@@ -50,7 +51,9 @@
       <label for="situacao">Situação</label>
       <select id="situacao" [(ngModel)]="situacao" name="situacao" (ngModelChange)="aoFiltrar()">
         <option value="abertas">Em aberto</option>
-        <option value="encerradas">Encerradas</option>
+        @for (s of situacoes; track s[0]) {
+          <option [value]="s[0]">{{ s[1] }}</option>
+        }
         <option value="todas">Todas</option>
       </select>
     </div>
@@ -121,12 +124,12 @@
               @if (!categoria) {
                 <td>{{ o.categoria }}</td>
               }
-              <td>{{ o.tipo }}</td>
+              <td>{{ rotulo(o.tipo) }}</td>
               <td class="numero">{{ o.valor !== null ? (o.valor | currency) : '—' }}</td>
               <td><app-badge-risco [valor]="o.risco"></app-badge-risco></td>
               <td class="data">{{ o.data ? (o.data | date: 'dd/MM/yyyy') : '—' }}</td>
               <td>
-                <span class="badge" [class.badge-baixo]="encerrada(o)">{{ rotulo(o.status) }}</span>
+                <span class="badge" [class.badge-baixo]="encerrada(o)" [title]="'Status na origem: ' + rotulo(o.status)">{{ situacaoDe(o) }}</span>
               </td>
             </tr>
           }
@@ -164,14 +167,14 @@
     </div>
     <dl class="grade-dados">
       <div><dt>Categoria</dt><dd>{{ o.categoria }}</dd></div>
-      <div><dt>Tipo</dt><dd>{{ o.tipo }}</dd></div>
+      <div><dt>Tipo</dt><dd>{{ rotulo(o.tipo) }}</dd></div>
       <div><dt>Valor</dt><dd>{{ o.valor !== null ? (o.valor | currency) : '—' }}</dd></div>
       <div><dt>Nível de risco</dt><dd><app-badge-risco [valor]="o.risco"></app-badge-risco></dd></div>
       <div><dt>Score</dt><dd>{{ o.score ?? '—' }}</dd></div>
       <div><dt>Data</dt><dd>{{ o.data ? (o.data | date: 'dd/MM/yyyy HH:mm') : '—' }}</dd></div>
-      <div><dt>Status</dt><dd>{{ rotulo(o.status) }}</dd></div>
+      <div><dt>Situação</dt><dd>{{ situacaoDe(o) }} <span class="texto-fraco">({{ rotulo(o.status) }})</span></dd></div>
       <div><dt>Resultado</dt><dd>{{ rotulo(o.resultado) }}</dd></div>
-      <div><dt>Analista</dt><dd>{{ o.analista ?? '—' }}</dd></div>
+      <div><dt>Responsável</dt><dd>{{ o.analista ?? '—' }}</dd></div>
       <div><dt>CPF/CNPJ</dt><dd>{{ o.documento ?? '—' }}</dd></div>
     </dl>
     @if (o.observacao) {
