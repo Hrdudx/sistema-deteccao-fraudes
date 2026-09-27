@@ -6,15 +6,15 @@
     </div>
 
     <h1>Entrar</h1>
-    <p class="texto-suave">Acesse com o e-mail e a senha cadastrados.</p>
+    <p class="texto-suave">Acesse com seu e-mail ou usuário e a senha cadastrados.</p>
 
     @if (erro) {
       <div class="aviso aviso-erro" role="alert">{{ erro }}</div>
     }
 
     <div class="campo">
-      <label for="email">E-mail</label>
-      <input id="email" type="email" name="email" [(ngModel)]="email" autocomplete="username" required autofocus />
+      <label for="email">E-mail ou usuário</label>
+      <input id="email" type="text" inputmode="email" autocapitalize="none" spellcheck="false" name="email" [(ngModel)]="email" autocomplete="username" required autofocus />
     </div>
 
     <div class="campo">

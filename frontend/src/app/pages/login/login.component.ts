@@ -31,7 +31,7 @@ export class LoginComponent {
   entrar(): void {
     this.erro = null;
     if (!this.email.trim() || !this.senha) {
-      this.erro = 'Informe e-mail e senha para continuar.';
+      this.erro = 'Informe e-mail (ou usuário) e senha para continuar.';
       return;
     }
 
