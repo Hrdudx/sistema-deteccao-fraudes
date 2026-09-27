@@ -1,21 +1,27 @@
 .sidebar {
   width: 240px;
-  background: #0f172a;
+  flex-shrink: 0;
+  background: var(--cor-menu);
   color: #e2e8f0;
   padding: 24px 16px;
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
 }
 
 .logo {
   margin-bottom: 24px;
+  padding: 0 12px;
   display: flex;
   flex-direction: column;
 }
 
 .logo strong {
-  font-size: 1.1rem;
+  font-size: 1.25rem;
+  color: #ffffff;
 }
 
 .logo span {
@@ -29,8 +35,7 @@ ul {
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  flex: 1;
+  gap: 2px;
 }
 
 a,
@@ -39,7 +44,7 @@ a,
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  padding: 8px 12px;
+  padding: 9px 12px;
   border-radius: 6px;
   color: #cbd5e1;
   text-decoration: none;
@@ -51,15 +56,35 @@ a,
   text-align: left;
 }
 
-a.ativo,
 a:hover,
 .item-expansivel:hover {
-  background: #1e293b;
+  background: var(--cor-menu-hover);
   color: #ffffff;
 }
 
+a.ativo {
+  background: var(--cor-menu-hover);
+  color: #ffffff;
+  font-weight: 600;
+  box-shadow: inset 3px 0 0 #60a5fa;
+}
+
+.pai-ativo {
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.seta {
+  font-size: 0.75rem;
+  transition: transform 0.15s ease;
+}
+
+.seta.girada {
+  transform: rotate(90deg);
+}
+
 .submenu {
-  padding-left: 16px;
+  padding-left: 12px;
   margin-top: 2px;
 }
 
@@ -68,7 +93,40 @@ a:hover,
   color: #94a3b8;
 }
 
-.sair {
+.rodape {
   margin-top: auto;
+  padding-top: 16px;
+  border-top: 1px solid var(--cor-menu-hover);
+}
+
+.usuario {
+  display: flex;
+  flex-direction: column;
+  padding: 0 12px 8px;
+  font-size: 0.85rem;
+}
+
+.usuario span {
   color: #94a3b8;
+  font-size: 0.75rem;
+}
+
+.sair {
+  color: #94a3b8;
+}
+
+/* Telas pequenas: menu vira gaveta lateral sobre o conteúdo */
+@media (max-width: 900px) {
+  .sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 20;
+    transform: translateX(-100%);
+    transition: transform 0.2s ease;
+  }
+
+  .sidebar.aberto {
+    transform: translateX(0);
+  }
 }

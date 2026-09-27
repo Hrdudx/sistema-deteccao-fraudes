@@ -1,4 +1,4 @@
-<nav class="sidebar">
+<nav class="sidebar" [class.aberto]="aberto" aria-label="Menu principal">
   <div class="logo">
     <strong>SGR</strong>
     <span>Sistema de Gerenciamento de Riscos</span>
@@ -6,25 +6,44 @@
 
   <ul>
     <li *ngFor="let item of itensPrincipais">
-      <a [routerLink]="item.rota" routerLinkActive="ativo">{{ item.rotulo }}</a>
+      <a [routerLink]="item.rota" routerLinkActive="ativo" ariaCurrentWhenActive="page">{{ item.rotulo }}</a>
     </li>
 
     <li>
-      <button type="button" class="item-expansivel" (click)="ocorrenciasAbertas = !ocorrenciasAbertas">
+      <button
+        type="button"
+        class="item-expansivel"
+        [class.pai-ativo]="emOcorrencias"
+        (click)="ocorrenciasAbertas = !ocorrenciasAbertas"
+        [attr.aria-expanded]="ocorrenciasAbertas"
+        aria-controls="submenu-ocorrencias"
+      >
         Ocorrências
-        <span>{{ ocorrenciasAbertas ? '▾' : '▸' }}</span>
+        <span class="seta" [class.girada]="ocorrenciasAbertas" aria-hidden="true">▸</span>
       </button>
-      <ul class="submenu" *ngIf="ocorrenciasAbertas">
+      <ul class="submenu" id="submenu-ocorrencias" *ngIf="ocorrenciasAbertas">
         <li *ngFor="let categoria of categoriasOcorrencias">
-          <a [routerLink]="categoria.rota" routerLinkActive="ativo">{{ categoria.rotulo }}</a>
+          <a
+            [routerLink]="categoria.rota"
+            routerLinkActive="ativo"
+            [routerLinkActiveOptions]="{ exact: true }"
+            ariaCurrentWhenActive="page"
+            >{{ categoria.rotulo }}</a
+          >
         </li>
       </ul>
     </li>
 
     <li *ngFor="let item of itensFinais">
-      <a [routerLink]="item.rota" routerLinkActive="ativo">{{ item.rotulo }}</a>
+      <a [routerLink]="item.rota" routerLinkActive="ativo" ariaCurrentWhenActive="page">{{ item.rotulo }}</a>
     </li>
   </ul>
 
-  <a class="sair" routerLink="/login">Sair</a>
+  <div class="rodape">
+    <div class="usuario" *ngIf="auth.usuario() as usuario">
+      <strong>{{ usuario.nome }}</strong>
+      <span>{{ usuario.perfil }}</span>
+    </div>
+    <a class="sair" routerLink="/login">{{ auth.usuario() ? 'Sair' : 'Entrar' }}</a>
+  </div>
 </nav>

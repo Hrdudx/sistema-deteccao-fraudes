@@ -1,0 +1,186 @@
+<app-cabecalho-pagina contexto="Gerenciamento de riscos" [titulo]="titulo" [subtitulo]="subtitulo">
+  <button type="button" class="botao botao-secundario" (click)="carregar()" [disabled]="carregando">
+    {{ carregando ? 'Atualizando...' : 'Atualizar' }}
+  </button>
+</app-cabecalho-pagina>
+
+@if (demonstracao && !carregando) {
+  <div class="aviso" role="status">
+    <span>Backend indisponível — exibindo <strong>dados de demonstração</strong>.</span>
+  </div>
+}
+
+<!-- Abas por categoria (somente PLD, Chargeback, KYC e Fraude — DMS seção 9.4) -->
+<nav class="card abas" aria-label="Categorias de ocorrência">
+  <a routerLink="/ocorrencias" routerLinkActive="ativa" [routerLinkActiveOptions]="{ exact: true }">
+    Todas <span class="contador">{{ totalAbertas(null) }}</span>
+  </a>
+  @for (cat of categorias; track cat) {
+    <a [routerLink]="rotaCategoria(cat)" routerLinkActive="ativa">
+      {{ cat }} <span class="contador">{{ totalAbertas(cat) }}</span>
+    </a>
+  }
+  <span class="em-aberto">Em aberto: {{ totalAbertas(categoria) }}</span>
+</nav>
+
+<section class="card" aria-label="Filtros de pesquisa">
+  <form class="filtros" (submit)="$event.preventDefault()">
+    <div class="campo">
+      <label for="busca">Buscar</label>
+      <input
+        id="busca"
+        type="search"
+        placeholder="Cliente, CPF/CNPJ ou ID da ocorrência"
+        [(ngModel)]="busca"
+        name="busca"
+        (ngModelChange)="aoFiltrar()"
+        autocomplete="off"
+      />
+    </div>
+    <div class="campo">
+      <label for="risco">Risco</label>
+      <select id="risco" [(ngModel)]="risco" name="risco" (ngModelChange)="aoFiltrar()">
+        <option value="">Todos</option>
+        @for (nivel of niveis; track nivel) {
+          <option [value]="nivel">{{ rotulosNivel[nivel] }}</option>
+        }
+      </select>
+    </div>
+    <div class="campo">
+      <label for="situacao">Situação</label>
+      <select id="situacao" [(ngModel)]="situacao" name="situacao" (ngModelChange)="aoFiltrar()">
+        <option value="abertas">Em aberto</option>
+        <option value="encerradas">Encerradas</option>
+        <option value="todas">Todas</option>
+      </select>
+    </div>
+    <div class="campo">
+      <label for="periodo">Período</label>
+      <select id="periodo" [(ngModel)]="periodo" name="periodo" (ngModelChange)="aoFiltrar()">
+        <option value="hoje">Hoje</option>
+        <option value="7">Últimos 7 dias</option>
+        <option value="30">Últimos 30 dias</option>
+        <option value="todos">Todo o período</option>
+      </select>
+    </div>
+    <div class="acoes">
+      <button type="button" class="botao botao-secundario" (click)="limparFiltros()" [disabled]="!filtrosAtivos">
+        Limpar filtros
+      </button>
+    </div>
+  </form>
+</section>
+
+<section class="card" aria-labelledby="titulo-registros">
+  <div class="card-cabecalho">
+    <h2 id="titulo-registros">Registros encontrados</h2>
+    @if (!carregando && !erro) {
+      <span class="badge badge-info" aria-live="polite">{{ filtradas.length }} registro(s)</span>
+    }
+  </div>
+
+  <app-estado-lista
+    [carregando]="carregando"
+    [erro]="erro"
+    [vazio]="!filtradas.length"
+    mensagemCarregando="Carregando ocorrências..."
+    [mensagemVazio]="filtrosAtivos ? 'Nenhuma ocorrência encontrada para os filtros informados.' : 'Nenhuma ocorrência em aberto.'"
+    (tentarNovamente)="carregar()"
+  ></app-estado-lista>
+
+  @if (!carregando && !erro && filtradas.length) {
+    <div class="tabela-rolagem">
+      <table class="tabela">
+        <thead>
+          <tr>
+            <th scope="col">ID</th>
+            <th scope="col">Cliente</th>
+            @if (!categoria) {
+              <th scope="col">Categoria</th>
+            }
+            <th scope="col">Tipo</th>
+            <th scope="col" class="numero">Valor</th>
+            <th scope="col">Risco</th>
+            <th scope="col">Data</th>
+            <th scope="col">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (o of paginaAtual; track o.categoria + o.id) {
+            <tr
+              class="clicavel"
+              [class.selecionada]="selecionada?.id === o.id"
+              tabindex="0"
+              [attr.aria-selected]="selecionada?.id === o.id"
+              (click)="selecionar(o)"
+              (keydown.enter)="selecionar(o)"
+              (keydown.space)="$event.preventDefault(); selecionar(o)"
+            >
+              <td class="id">#{{ o.id }}</td>
+              <td>{{ o.cliente }}</td>
+              @if (!categoria) {
+                <td>{{ o.categoria }}</td>
+              }
+              <td>{{ o.tipo }}</td>
+              <td class="numero">{{ o.valor !== null ? (o.valor | currency) : '—' }}</td>
+              <td><app-badge-risco [valor]="o.risco"></app-badge-risco></td>
+              <td class="data">{{ o.data ? (o.data | date: 'dd/MM/yyyy') : '—' }}</td>
+              <td>
+                <span class="badge" [class.badge-baixo]="encerrada(o)">{{ rotulo(o.status) }}</span>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    @if (totalPaginas > 1) {
+      <nav class="paginacao" aria-label="Paginação">
+        <button type="button" class="botao botao-secundario" (click)="irParaPagina(pagina - 1)" [disabled]="pagina <= 1">
+          ‹ Anterior
+        </button>
+        <span>Página {{ pagina }} de {{ totalPaginas }}</span>
+        <button
+          type="button"
+          class="botao botao-secundario"
+          (click)="irParaPagina(pagina + 1)"
+          [disabled]="pagina >= totalPaginas"
+        >
+          Próxima ›
+        </button>
+      </nav>
+    }
+  }
+</section>
+
+@if (selecionada; as o) {
+  <section class="card detalhe" aria-labelledby="titulo-detalhe">
+    <div class="card-cabecalho">
+      <div>
+        <h2 id="titulo-detalhe">Detalhe selecionado</h2>
+        <p class="texto-suave">#{{ o.id }} · {{ o.cliente }}</p>
+      </div>
+      <button type="button" class="botao-link" (click)="selecionada = null">Fechar</button>
+    </div>
+    <dl class="grade-dados">
+      <div><dt>Categoria</dt><dd>{{ o.categoria }}</dd></div>
+      <div><dt>Tipo</dt><dd>{{ o.tipo }}</dd></div>
+      <div><dt>Valor</dt><dd>{{ o.valor !== null ? (o.valor | currency) : '—' }}</dd></div>
+      <div><dt>Nível de risco</dt><dd><app-badge-risco [valor]="o.risco"></app-badge-risco></dd></div>
+      <div><dt>Score</dt><dd>{{ o.score ?? '—' }}</dd></div>
+      <div><dt>Data</dt><dd>{{ o.data ? (o.data | date: 'dd/MM/yyyy HH:mm') : '—' }}</dd></div>
+      <div><dt>Status</dt><dd>{{ rotulo(o.status) }}</dd></div>
+      <div><dt>Resultado</dt><dd>{{ rotulo(o.resultado) }}</dd></div>
+      <div><dt>Analista</dt><dd>{{ o.analista ?? '—' }}</dd></div>
+      <div><dt>CPF/CNPJ</dt><dd>{{ o.documento ?? '—' }}</dd></div>
+    </dl>
+    @if (o.observacao) {
+      <p class="observacao">{{ o.observacao }}</p>
+    }
+    @if (o.clienteId) {
+      <div class="acoes">
+        <a class="botao botao-secundario" [routerLink]="['/clientes', o.clienteId]">Ver histórico do cliente</a>
+      </div>
+    }
+  </section>
+}

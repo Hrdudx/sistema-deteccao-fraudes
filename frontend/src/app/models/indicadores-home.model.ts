@@ -1,13 +1,15 @@
-// Formato esperado do endpoint que o backend (HomeService, conforme o DMS) deve expor.
-// Combine este contrato com o Diogo antes de implementar — é só uma proposta inicial.
+// Formato esperado do endpoint GET /api/home/indicadores (HomeService do backend, conforme o DMS).
+// Enquanto o endpoint agregado não existir, o frontend calcula estes números a partir
+// das ocorrências reais da API (ver HomeService) — por isso os campos de SLA aceitam
+// null: o modelo de dados atual ainda não tem prazo/SLA por ocorrência.
 
 export interface IndicadoresHome {
   ocorrenciasAbertas: number;
   ocorrenciasCriticas: number;
   ocorrenciasAltas: number;
   tratativasConcluidasHoje: number;
-  slaPercentualDentroPrazo: number;
-  slaVencidas: number;
+  slaPercentualDentroPrazo: number | null;
+  slaVencidas: number | null;
   ocorrenciasPorTipo: {
     PLD: number;
     Chargeback: number;
@@ -21,9 +23,10 @@ export interface IndicadoresHome {
 }
 
 export interface ResumoOcorrencia {
-  prioridade: 'Alta' | 'Media' | 'Baixa';
+  id?: string;
+  prioridade: 'Critica' | 'Alta' | 'Media' | 'Baixa';
   ocorrencia: string;
   cliente: string;
-  valor: number;
-  slaRestante: string;
+  valor: number | null;
+  slaRestante: string | null;
 }

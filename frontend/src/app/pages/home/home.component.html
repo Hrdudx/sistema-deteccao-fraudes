@@ -1,66 +1,114 @@
-<div class="home">
-  <h1>Home</h1>
-  <p>Visão geral da operação de riscos financeiros</p>
+<app-cabecalho-pagina titulo="Home" subtitulo="Visão geral da operação de riscos financeiros">
+  <button type="button" class="botao botao-secundario" (click)="carregarIndicadores()" [disabled]="carregando">
+    {{ carregando ? 'Atualizando...' : 'Atualizar' }}
+  </button>
+</app-cabecalho-pagina>
 
-  <p *ngIf="carregando">Carregando dados da operação...</p>
-  <p *ngIf="erro" class="erro">{{ erro }}</p>
+@if (demonstracao && !carregando) {
+  <div class="aviso" role="status">
+    <span>Backend indisponível — exibindo <strong>dados de demonstração</strong>. Inicie a API para ver os dados reais.</span>
+  </div>
+}
 
-  <ng-container *ngIf="indicadores as dados">
-    <div class="kpi-grid">
-      <div class="kpi-card">
-        <span>Ocorrências abertas</span>
-        <strong>{{ dados.ocorrenciasAbertas }}</strong>
-        <small>{{ dados.ocorrenciasCriticas }} críticas · {{ dados.ocorrenciasAltas }} altas</small>
-      </div>
-      <div class="kpi-card">
-        <span>Tratativas concluídas</span>
-        <strong>{{ dados.tratativasConcluidasHoje }}</strong>
-        <small>Hoje</small>
-      </div>
-      <div class="kpi-card">
-        <span>SLA dentro do prazo</span>
-        <strong>{{ dados.slaPercentualDentroPrazo }}%</strong>
-      </div>
-      <div class="kpi-card">
-        <span>SLA vencido</span>
-        <strong>{{ dados.slaVencidas }}</strong>
-        <small>Exige priorização</small>
-      </div>
+<app-estado-lista
+  [carregando]="carregando && !indicadores"
+  [erro]="erro"
+  mensagemCarregando="Carregando dados da operação..."
+  (tentarNovamente)="carregarIndicadores()"
+></app-estado-lista>
+
+@if (indicadores; as dados) {
+  <div class="kpi-grid">
+    <a class="kpi-card" routerLink="/ocorrencias">
+      <span>Ocorrências abertas</span>
+      <strong>{{ dados.ocorrenciasAbertas | number }}</strong>
+      <small>
+        <span class="destaque-critico">{{ dados.ocorrenciasCriticas }} críticas</span> ·
+        <span class="destaque-alto">{{ dados.ocorrenciasAltas }} altas</span>
+      </small>
+    </a>
+    <div class="kpi-card">
+      <span>Tratativas concluídas</span>
+      <strong>{{ dados.tratativasConcluidasHoje | number }}</strong>
+      <small>Hoje</small>
     </div>
+    <div class="kpi-card">
+      <span>SLA dentro do prazo</span>
+      <strong>{{ dados.slaPercentualDentroPrazo !== null ? dados.slaPercentualDentroPrazo + '%' : '—' }}</strong>
+      <small>{{ dados.slaPercentualDentroPrazo !== null ? 'No mês' : 'Sem dados de SLA na base' }}</small>
+    </div>
+    <div class="kpi-card" [class.kpi-alerta]="(dados.slaVencidas ?? 0) > 0">
+      <span>SLA vencido</span>
+      <strong>{{ dados.slaVencidas ?? '—' }}</strong>
+      <small>{{ dados.slaVencidas !== null ? 'Exige priorização' : 'Sem dados de SLA na base' }}</small>
+    </div>
+  </div>
 
-    <section class="ocorrencias-por-tipo">
-      <h2>Ocorrências por tipo</h2>
-      <div class="linha-tipo" *ngFor="let item of tiposDeOcorrencia">
-        <span>{{ item.tipo }}</span>
-        <strong>{{ item.total }}</strong>
-      </div>
-    </section>
+  <section class="card" aria-labelledby="titulo-por-tipo">
+    <div class="card-cabecalho">
+      <h2 id="titulo-por-tipo">Ocorrências por tipo</h2>
+      <span class="texto-fraco">Clique em um tipo para abrir a fila</span>
+    </div>
+    <ul class="lista-tipos">
+      @for (item of tiposDeOcorrencia; track item.tipo) {
+        <li>
+          <a [routerLink]="item.rota" class="linha-tipo">
+            <span class="nome-tipo">{{ item.tipo }}</span>
+            <span class="barra" aria-hidden="true"><span [style.width.%]="item.percentual"></span></span>
+            <strong>{{ item.total | number }}</strong>
+          </a>
+        </li>
+      }
+    </ul>
+  </section>
 
-    <!-- Bloco principal conforme o DMS (seção 9.2): Resumo do mês vem antes do Resumo do dia -->
-    <section class="resumo-mes">
-      <h2>Resumo do mês</h2>
-      <table>
-        <tr *ngFor="let item of dados.resumoDoMes">
-          <td>{{ item.prioridade }}</td>
-          <td>{{ item.ocorrencia }}</td>
-          <td>{{ item.cliente }}</td>
-          <td>{{ item.valor | currency: 'BRL' }}</td>
-          <td>{{ item.slaRestante }}</td>
-        </tr>
+  <!-- Bloco principal conforme o DMS (seção 9.2): Resumo do mês vem antes do Resumo do dia -->
+  <section class="card" aria-labelledby="titulo-resumo-mes">
+    <div class="card-cabecalho">
+      <h2 id="titulo-resumo-mes">Resumo do mês</h2>
+      <a routerLink="/ocorrencias" class="texto-fraco">Ver todas as ocorrências →</a>
+    </div>
+    <ng-container *ngTemplateOutlet="tabelaResumo; context: { $implicit: dados.resumoDoMes, vazio: 'Nenhuma ocorrência aberta neste mês.' }"></ng-container>
+  </section>
+
+  <section class="card" aria-labelledby="titulo-resumo-dia">
+    <div class="card-cabecalho">
+      <h2 id="titulo-resumo-dia">Resumo do dia</h2>
+      @if (atualizadoEm) {
+        <span class="texto-fraco">Atualizado às {{ atualizadoEm | date: 'HH:mm' }}</span>
+      }
+    </div>
+    <ng-container *ngTemplateOutlet="tabelaResumo; context: { $implicit: dados.resumoDoDia, vazio: 'Nenhuma ocorrência aberta hoje.' }"></ng-container>
+  </section>
+}
+
+<ng-template #tabelaResumo let-itens let-vazio="vazio">
+  @if (itens.length) {
+    <div class="tabela-rolagem">
+      <table class="tabela">
+        <thead>
+          <tr>
+            <th scope="col">Prioridade</th>
+            <th scope="col">Ocorrência</th>
+            <th scope="col">Cliente</th>
+            <th scope="col" class="numero">Valor</th>
+            <th scope="col">SLA</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of itens; track $index) {
+            <tr>
+              <td><app-badge-risco [valor]="item.prioridade" [texto]="rotuloPrioridade(item)"></app-badge-risco></td>
+              <td><a [routerLink]="rotaOcorrencia(item)">{{ item.ocorrencia }}</a></td>
+              <td>{{ item.cliente }}</td>
+              <td class="numero">{{ item.valor !== null ? (item.valor | currency) : '—' }}</td>
+              <td>{{ item.slaRestante ?? '—' }}</td>
+            </tr>
+          }
+        </tbody>
       </table>
-    </section>
-
-    <section class="resumo-dia">
-      <h2>Resumo do dia</h2>
-      <table>
-        <tr *ngFor="let item of dados.resumoDoDia">
-          <td [class]="'prioridade-' + item.prioridade.toLowerCase()">{{ item.prioridade }}</td>
-          <td>{{ item.ocorrencia }}</td>
-          <td>{{ item.cliente }}</td>
-          <td>{{ item.valor | currency: 'BRL' }}</td>
-          <td>{{ item.slaRestante }}</td>
-        </tr>
-      </table>
-    </section>
-  </ng-container>
-</div>
+    </div>
+  } @else {
+    <app-estado-lista [vazio]="true" [mensagemVazio]="vazio"></app-estado-lista>
+  }
+</ng-template>

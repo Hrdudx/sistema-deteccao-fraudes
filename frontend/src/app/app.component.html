@@ -1,6 +1,28 @@
-<div class="layout">
-  <app-sidebar></app-sidebar>
-  <main class="conteudo">
-    <router-outlet></router-outlet>
-  </main>
-</div>
+@if (telaCheia) {
+  <router-outlet></router-outlet>
+} @else {
+  <a class="pular-conteudo" href="#conteudo">Pular para o conteúdo</a>
+  <div class="layout">
+    <app-sidebar [aberto]="menuAberto" (fechar)="menuAberto = false"></app-sidebar>
+    @if (menuAberto) {
+      <div class="fundo-menu" (click)="menuAberto = false" aria-hidden="true"></div>
+    }
+    <div class="principal">
+      <header class="barra-superior">
+        <button
+          type="button"
+          class="botao-menu"
+          (click)="menuAberto = !menuAberto"
+          [attr.aria-expanded]="menuAberto"
+          aria-label="Abrir menu"
+        >
+          ☰
+        </button>
+        <strong>SGR</strong>
+      </header>
+      <main class="conteudo" id="conteudo" tabindex="-1">
+        <router-outlet></router-outlet>
+      </main>
+    </div>
+  </div>
+}
