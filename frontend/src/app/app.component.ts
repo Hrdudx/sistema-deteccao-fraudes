@@ -5,6 +5,7 @@ import { SidebarComponent } from './components/sidebar/sidebar.component';
 import { IconeComponent } from './components/icone/icone.component';
 import { AuthService } from './services/auth.service';
 import { formatarRotulo } from './utils/formatacao';
+import { PERFIS_USUARIO } from './services/usuarios.service';
 
 @Component({
   selector: 'app-root',
@@ -34,7 +35,8 @@ export class AppComponent {
 
   get perfil(): string {
     const usuario = this.auth.usuario();
-    return usuario ? formatarRotulo(usuario.perfil) : 'Visitante';
+    if (!usuario) return 'Visitante';
+    return PERFIS_USUARIO.find((p) => p.valor === usuario.perfil?.toUpperCase())?.rotulo ?? formatarRotulo(usuario.perfil);
   }
 
   alternarMenu(): void {

@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { filter } from 'rxjs';
 import { IconeComponent } from '../icone/icone.component';
+import { AuthService } from '../../services/auth.service';
 
 // Estrutura do menu conforme o Documento de Modelagem do Sistema (seção 9.1):
 // "O menu lateral previsto para o projeto é composto por Home, Clientes,
@@ -48,9 +49,17 @@ export class SidebarComponent {
   ];
 
   ocorrenciasAbertas = true;
+
+  // Usuários só aparece no menu para o perfil Administrador (RF04).
+  get itensFinaisVisiveis(): ItemMenu[] {
+    return this.itensFinais.filter((i) => i.rota !== '/usuarios' || this.auth.administrador());
+  }
   emOcorrencias = false;
 
-  constructor(private router: Router) {
+  constructor(
+    private router: Router,
+    private auth: AuthService,
+  ) {
     this.router.events.pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd)).subscribe((e) => {
       // Destaca "Ocorrências" quando qualquer categoria estiver aberta e garante
       // que o submenu apareça ao navegar para ela por outro caminho (ex.: Home).

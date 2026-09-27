@@ -70,6 +70,25 @@ ng serve
 
 Acesse `http://localhost:4200`.
 
+### Apresentação (sem backend)
+
+```bash
+npm run demo
+```
+
+Abre o navegador sozinho, usa só os dados de demonstração e não mostra erros de
+conexão no terminal. Entre com um usuário da equipe (senha `sgr123`):
+
+| Usuário | Perfil |
+|---------|--------|
+| `airon.francelino@sgr` | Gestor |
+| `diogo.pereira@sgr` | Administrador (único que acessa **Usuários**) |
+| `eduarda.rosa@sgr` | Analista de Riscos |
+| `gabriella.cotrim@sgr` | Analista de Compliance |
+| `hayyra.rocha@sgr` | Analista de Riscos |
+
+Com o backend rodando (`npm start`), o login usa o `POST /api/auth/login` de verdade.
+
 Com o backend rodando (`./mvnw spring-boot:run` na raiz), o `ng serve` repassa as
 chamadas `/api` para `http://localhost:8080` usando o `proxy.conf.json` — assim não
 há erro de CORS. Se o backend estiver em outra porta (ex.: 8081), altere o `target`
@@ -128,7 +147,8 @@ A URL base da API é configurada em `src/environments/environment.ts` (`apiUrl`)
 - [x] Home integrada ao backend (indicadores calculados das ocorrências reais)
 - [x] Fila central de Ocorrências (MVP): abas por categoria, busca por cliente/CPF/CNPJ/ID, filtros de risco, situação (Pendente / Em tratativa / Concluída) e período, paginação e painel de detalhe
 - [x] Telas de Clientes: consulta com filtros e histórico do cliente (ocorrências, transações, contas e risco consolidado)
-- [x] Tela de Login integrada à US01 e nome/perfil do usuário no menu
+- [x] Login obrigatório (UC01): sem sessão, qualquer tela leva ao login e depois volta para onde o usuário ia; mensagens de credencial inválida e usuário inativo; login de demonstração com a equipe quando o backend está fora do ar
+- [x] Controle de acesso por perfil (RF04): Usuários só para Administrador (menu e rota), com página "Acesso restrito"
 - [x] Páginas "em construção" (Relatórios, Usuários) e 404 — nenhum link do menu leva mais a tela em branco
 - [x] Home refeita no modelo aprovado: cards com ícones, gráficos de rosca, medidor de SLA, SLA por tipo, prioridade e resumo do dia
 - [x] Menu lateral claro com ícones e barra superior com menu do usuário (perfil / sair), como no modelo

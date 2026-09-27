@@ -79,10 +79,10 @@ export function mensagemDeErro(erro: HttpErrorResponse): string {
 }
 
 // Equipe do projeto (e-mails fictícios do sistema — o repositório é público).
-const USUARIOS_DEMONSTRACAO: UsuarioSistema[] = [
-  { id: 1, nome: 'Airon Francelino Valerio', email: 'airon.francelino@sgr.local', perfil: 'GESTOR', status: 'ATIVO' },
-  { id: 2, nome: 'Diogo Pereira da Silva', email: 'diogo.pereira@sgr.local', perfil: 'ADMINISTRADOR', status: 'ATIVO' },
-  { id: 3, nome: 'Eduarda Gabriela Rosa Protazio', email: 'eduarda.rosa@sgr.local', perfil: 'ANALISTA_RISCOS', status: 'ATIVO' },
-  { id: 4, nome: 'Gabriella Cotrim Viana da Silva', email: 'gabriella.cotrim@sgr.local', perfil: 'ANALISTA_COMPLIANCE', status: 'ATIVO' },
-  { id: 5, nome: 'Hayyra Eduarda Rocha Honorio', email: 'hayyra.rocha@sgr.local', perfil: 'ANALISTA_RISCOS', status: 'ATIVO' },
+export const USUARIOS_DEMONSTRACAO: UsuarioSistema[] = [
+  { id: 1, nome: 'Airon Francelino Valerio', email: 'airon.francelino@sgr', perfil: 'GESTOR', status: 'ATIVO' },
+  { id: 2, nome: 'Diogo Pereira da Silva', email: 'diogo.pereira@sgr', perfil: 'ADMINISTRADOR', status: 'ATIVO' },
+  { id: 3, nome: 'Eduarda Gabriela Rosa Protazio', email: 'eduarda.rosa@sgr', perfil: 'ANALISTA_RISCOS', status: 'ATIVO' },
+  { id: 4, nome: 'Gabriella Cotrim Viana da Silva', email: 'gabriella.cotrim@sgr', perfil: 'ANALISTA_COMPLIANCE', status: 'ATIVO' },
+  { id: 5, nome: 'Hayyra Eduarda Rocha Honorio', email: 'hayyra.rocha@sgr', perfil: 'ANALISTA_RISCOS', status: 'ATIVO' },
 ];

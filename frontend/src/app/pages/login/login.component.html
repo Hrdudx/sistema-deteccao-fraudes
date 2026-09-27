@@ -37,5 +37,20 @@
     <button type="submit" class="botao entrar" [disabled]="enviando">
       {{ enviando ? 'Entrando...' : 'Entrar' }}
     </button>
+
+    <details class="demonstracao">
+      <summary>Acesso para demonstração</summary>
+      <p class="texto-fraco">
+        Sem o backend rodando, entre com um usuário da equipe. Senha: <strong>{{ senhaDemonstracao }}</strong>
+      </p>
+      <ul>
+        @for (c of contasDemonstracao; track c.id) {
+          <li>
+            <button type="button" class="botao-link" (click)="preencher(c.email)">{{ c.nome }}</button>
+            <small class="texto-fraco">{{ c.rotuloPerfil }}</small>
+          </li>
+        }
+      </ul>
+    </details>
   </form>
 </main>

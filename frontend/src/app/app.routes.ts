@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { HomeComponent } from './pages/home/home.component';
+import { administradorGuard, autenticadoGuard } from './services/auth.guard';
 
 // Menu conforme o DMS (seção 9.1): Home, Clientes, Ocorrências, Relatórios, Usuários.
 // Categorias de Ocorrência: somente PLD, Chargeback, KYC e Fraude.
@@ -8,13 +9,19 @@ import { HomeComponent } from './pages/home/home.component';
 const ocorrencias = () => import('./pages/ocorrencias/ocorrencias.component').then((m) => m.OcorrenciasComponent);
 
 export const routes: Routes = [
-  { path: '', redirectTo: 'home', pathMatch: 'full' },
-  { path: 'home', component: HomeComponent, title: 'Home · SGR' },
   {
     path: 'login',
     loadComponent: () => import('./pages/login/login.component').then((m) => m.LoginComponent),
     title: 'Entrar · SGR',
   },
+  // Todas as demais telas exigem login (UC01). A tela de Usuários também exige o
+  // perfil Administrador (RF04 / TEL13).
+  {
+    path: '',
+    canActivateChild: [autenticadoGuard],
+    children: [
+  { path: '', redirectTo: 'home', pathMatch: 'full' },
+  { path: 'home', component: HomeComponent, title: 'Home · SGR' },
   {
     path: 'clientes',
     loadComponent: () => import('./pages/clientes/clientes.component').then((m) => m.ClientesComponent),
@@ -58,11 +65,19 @@ export const routes: Routes = [
   {
     path: 'usuarios',
     loadComponent: () => import('./pages/usuarios/usuarios.component').then((m) => m.UsuariosComponent),
+    canActivate: [administradorGuard],
     title: 'Usuários · SGR',
+  },
+  {
+    path: 'acesso-negado',
+    loadComponent: () => import('./pages/acesso-negado/acesso-negado.component').then((m) => m.AcessoNegadoComponent),
+    title: 'Acesso restrito · SGR',
   },
   {
     path: '**',
     loadComponent: () => import('./pages/nao-encontrada/nao-encontrada.component').then((m) => m.NaoEncontradaComponent),
     title: 'Página não encontrada · SGR',
+  },
+    ],
   },
 ];
