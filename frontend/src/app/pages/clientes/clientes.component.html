@@ -17,12 +17,19 @@
       <input
         id="busca-cliente"
         type="search"
-        placeholder="Nome, CPF/CNPJ, código ou cidade"
+        placeholder="ID (ex.: CLI0001) ou nome do cliente"
         [(ngModel)]="busca"
         name="busca"
         (ngModelChange)="pagina = 1"
+        list="sugestoes-clientes"
         autocomplete="off"
       />
+      <!-- Sugestões enquanto digita: ID e nome dos clientes encontrados -->
+      <datalist id="sugestoes-clientes">
+        @for (c of sugestoes; track c.idCliente) {
+          <option [value]="c.idCliente">{{ c.idCliente }} — {{ c.nomeRazaoSocial }}</option>
+        }
+      </datalist>
     </div>
     <div class="campo">
       <label for="tipo-pessoa">Tipo de pessoa</label>
@@ -73,7 +80,7 @@
           <tr>
             <th scope="col">Código</th>
             <th scope="col">Nome / Razão social</th>
-            <th scope="col">CPF/CNPJ</th>
+            <th scope="col">Documento</th>
             <th scope="col">Tipo</th>
             <th scope="col">Cidade</th>
             <th scope="col">Situação</th>

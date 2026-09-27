@@ -149,7 +149,7 @@ export class OcorrenciasComponent implements OnInit {
       .filter((o) => {
         if (!termo) return true;
         const alvo = semAcento([o.id, o.cliente, o.documento ?? '', o.tipo].join(' ')).toLowerCase();
-        // Busca por documento também sem pontuação (ex.: digitar só os números do CPF)
+        // Busca por documento também só pelos números (ex.: "0001" para DOC-FICT-0001)
         const digitos = termo.replace(/\D/g, '');
         return alvo.includes(termo) || (digitos.length >= 3 && alvo.replace(/\D/g, '').includes(digitos));
       })

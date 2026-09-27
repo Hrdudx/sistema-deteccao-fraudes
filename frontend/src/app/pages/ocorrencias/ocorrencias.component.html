@@ -42,7 +42,7 @@
       <input
         id="busca"
         type="search"
-        placeholder="Cliente, CPF/CNPJ ou ID da ocorrência"
+        placeholder="Cliente, documento ou ID da ocorrência"
         [(ngModel)]="busca"
         name="busca"
         (ngModelChange)="aoFiltrar()"
@@ -187,7 +187,7 @@
       <div><dt>Situação</dt><dd>{{ situacaoDe(o) }} <span class="texto-fraco">({{ rotulo(o.status) }})</span></dd></div>
       <div><dt>Resultado</dt><dd>{{ rotulo(o.resultado) }}</dd></div>
       <div><dt>Responsável</dt><dd>{{ o.analista ?? '—' }}</dd></div>
-      <div><dt>CPF/CNPJ</dt><dd>{{ o.documento ?? '—' }}</dd></div>
+      <div><dt>Documento do cliente</dt><dd>{{ o.documento ?? '—' }}</dd></div>
     </dl>
     @if (o.observacao) {
       <p class="observacao">{{ o.observacao }}</p>

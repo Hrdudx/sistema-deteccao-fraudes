@@ -60,18 +60,34 @@ export class ClientesComponent implements OnInit {
     return [...new Set(this.clientes.map((c) => c.statusCliente).filter((s): s is string => !!s))].sort();
   }
 
+  // Pesquisa por ID ou nome/razão social (RF20). Cada campo é comparado
+  // separadamente, para um número não "emendar" com o de outro campo.
+  private corresponde(c: ClienteApi, termo: string): boolean {
+    if (!termo) return true;
+    const id = c.idCliente.toLowerCase();
+    const nome = semAcento(c.nomeRazaoSocial).toLowerCase();
+    const digitos = termo.replace(/\D/g, '');
+    return (
+      id.includes(termo) ||
+      nome.includes(termo) ||
+      // "1", "0001" ou "cli 1" também encontram CLI0001
+      (digitos.length > 0 && /^[a-z\s-]*\d+$/.test(termo) && Number(id.replace(/\D/g, '')) === Number(digitos))
+    );
+  }
+
   get filtrados(): ClienteApi[] {
     const termo = semAcento(this.busca.trim()).toLowerCase();
-    const digitos = termo.replace(/\D/g, '');
     return this.clientes
       .filter((c) => !this.tipoPessoa || c.tipoPessoa === this.tipoPessoa)
       .filter((c) => !this.status || c.statusCliente === this.status)
-      .filter((c) => {
-        if (!termo) return true;
-        const alvo = semAcento([c.idCliente, c.nomeRazaoSocial, c.documentoFicticio, c.cidade ?? ''].join(' ')).toLowerCase();
-        return alvo.includes(termo) || (digitos.length >= 3 && alvo.replace(/\D/g, '').includes(digitos));
-      })
+      .filter((c) => this.corresponde(c, termo))
       .sort((a, b) => a.nomeRazaoSocial.localeCompare(b.nomeRazaoSocial, 'pt-BR'));
+  }
+
+  // Até 8 sugestões para a lista que aparece enquanto o usuário digita.
+  get sugestoes(): ClienteApi[] {
+    const termo = semAcento(this.busca.trim()).toLowerCase();
+    return termo.length < 1 ? [] : this.clientes.filter((c) => this.corresponde(c, termo)).slice(0, 8);
   }
 
   get totalPaginas(): number {
