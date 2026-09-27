@@ -1,3 +1,27 @@
+.visoes {
+  display: inline-flex;
+  gap: 4px;
+  padding: 4px;
+  margin-bottom: 16px;
+  background: var(--cor-neutro-fundo);
+  border-radius: 10px;
+  flex-wrap: wrap;
+}
+
+.visoes a {
+  padding: 8px 18px;
+  border-radius: 8px;
+  color: var(--cor-texto-suave);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.visoes a.ativa {
+  background: var(--cor-superficie);
+  color: var(--cor-primaria);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.12);
+}
+
 .abas {
   display: flex;
   align-items: center;

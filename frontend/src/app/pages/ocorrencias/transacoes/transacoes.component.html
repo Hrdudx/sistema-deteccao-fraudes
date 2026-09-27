@@ -1,0 +1,180 @@
+@if (demonstracao && !carregando) {
+  <div class="aviso" role="status">
+    <span>Backend indisponível — exibindo <strong>dados de demonstração</strong>.</span>
+  </div>
+}
+
+<p class="explicacao texto-suave">
+  @if (visao === 'movimentacoes') {
+    Todas as movimentações financeiras dos clientes (PIX, TED, boleto e transferência interna, sempre em BRL).
+    Servem de contexto para a análise das ocorrências.
+  } @else {
+    Transações com sinal de risco: score ≥ {{ limiteScore }}, fora do perfil do cliente, em análise ou negadas.
+    Ordenadas pelo score, da maior para a menor.
+  }
+</p>
+
+<section class="card" aria-label="Filtros de pesquisa">
+  <form class="filtros filtros-transacoes" (submit)="$event.preventDefault()">
+    <div class="campo">
+      <label for="busca-trx">Buscar</label>
+      <input
+        id="busca-trx"
+        type="search"
+        placeholder="Cliente, CPF/CNPJ, contraparte ou ID"
+        [(ngModel)]="busca"
+        name="busca"
+        (ngModelChange)="aoFiltrar()"
+        autocomplete="off"
+      />
+    </div>
+    <div class="campo">
+      <label for="tipo-trx">Tipo</label>
+      <select id="tipo-trx" [(ngModel)]="tipo" name="tipo" (ngModelChange)="aoFiltrar()">
+        <option value="">Todos</option>
+        @for (t of tipos; track t) {
+          <option [value]="t">{{ rotulo(t) }}</option>
+        }
+      </select>
+    </div>
+    <div class="campo">
+      <label for="status-trx">Status</label>
+      <select id="status-trx" [(ngModel)]="status" name="status" (ngModelChange)="aoFiltrar()">
+        <option value="">Todos</option>
+        @for (s of statusPossiveis; track s) {
+          <option [value]="s">{{ rotulo(s) }}</option>
+        }
+      </select>
+    </div>
+    <div class="campo">
+      <label for="periodo-trx">Período</label>
+      <select id="periodo-trx" [(ngModel)]="periodo" name="periodo" (ngModelChange)="aoFiltrar()">
+        <option value="hoje">Hoje</option>
+        <option value="7">Últimos 7 dias</option>
+        <option value="30">Últimos 30 dias</option>
+        <option value="todos">Todo o período</option>
+      </select>
+    </div>
+    <div class="acoes">
+      <button type="button" class="botao botao-secundario" (click)="limparFiltros()" [disabled]="!filtrosAtivos">Limpar filtros</button>
+    </div>
+  </form>
+</section>
+
+<section class="card" [attr.aria-label]="visao === 'movimentacoes' ? 'Movimentações' : 'Transacional'">
+  <div class="card-cabecalho">
+    <h2>{{ visao === 'movimentacoes' ? 'Movimentações' : 'Transações com sinal de risco' }}</h2>
+    @if (!carregando && !erro) {
+      <span class="badge badge-info" aria-live="polite">{{ filtradas.length }} transação(ões) · {{ volumeFiltrado | currency }}</span>
+    }
+  </div>
+
+  <app-estado-lista
+    [carregando]="carregando"
+    [erro]="erro"
+    [vazio]="!filtradas.length"
+    mensagemCarregando="Carregando transações..."
+    [mensagemVazio]="filtrosAtivos ? 'Nenhuma transação encontrada para os filtros informados.' : 'Nenhuma transação registrada.'"
+    (tentarNovamente)="carregar()"
+  ></app-estado-lista>
+
+  @if (!carregando && !erro && filtradas.length) {
+    <div class="tabela-rolagem">
+      <table class="tabela">
+        <thead>
+          <tr>
+            <th scope="col">ID</th>
+            <th scope="col">Data/hora</th>
+            <th scope="col">Cliente</th>
+            <th scope="col">Tipo</th>
+            <th scope="col">Canal</th>
+            <th scope="col">Contraparte</th>
+            <th scope="col" class="numero">Valor</th>
+            <th scope="col">Score</th>
+            @if (visao === 'transacional') {
+              <th scope="col">Sinais</th>
+            }
+            <th scope="col">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (t of paginaAtual; track t.idTransacao) {
+            <tr
+              class="clicavel"
+              [class.selecionada]="selecionada?.idTransacao === t.idTransacao"
+              tabindex="0"
+              (click)="selecionar(t)"
+              (keydown.enter)="selecionar(t)"
+            >
+              <td class="id">{{ t.idTransacao }}</td>
+              <td class="sem-quebra">{{ t.dataHoraTransacao ? (t.dataHoraTransacao | date: 'dd/MM/yyyy HH:mm') : '—' }}</td>
+              <td>{{ t.clienteOrigem?.nomeRazaoSocial ?? '—' }}</td>
+              <td>{{ rotulo(t.tipoTransacao) }}</td>
+              <td>{{ rotulo(t.canal) }}</td>
+              <td>{{ t.nomeContraparte ?? '—' }}</td>
+              <td class="numero">{{ t.valor != null ? (t.valor | currency) : '—' }}</td>
+              <td><span class="badge" [ngClass]="classeScore(t.scoreTransacao)">{{ t.scoreTransacao ?? '—' }}</span></td>
+              @if (visao === 'transacional') {
+                <td>
+                  <div class="sinais">
+                    @for (s of sinais(t); track s) {
+                      <span class="badge">{{ s }}</span>
+                    } @empty {
+                      <span class="texto-fraco">—</span>
+                    }
+                  </div>
+                </td>
+              }
+              <td><span class="badge" [ngClass]="classeStatus(t.statusTransacao)">{{ rotulo(t.statusTransacao) }}</span></td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    @if (totalPaginas > 1) {
+      <nav class="paginacao" aria-label="Paginação">
+        <button type="button" class="botao botao-secundario" (click)="pagina = pagina - 1; selecionada = null" [disabled]="pagina <= 1">‹ Anterior</button>
+        <span>Página {{ pagina }} de {{ totalPaginas }}</span>
+        <button type="button" class="botao botao-secundario" (click)="pagina = pagina + 1; selecionada = null" [disabled]="pagina >= totalPaginas">Próxima ›</button>
+      </nav>
+    }
+  }
+</section>
+
+@if (selecionada; as t) {
+  <section class="card" aria-labelledby="titulo-trx">
+    <div class="card-cabecalho">
+      <div>
+        <h2 id="titulo-trx">{{ t.idTransacao }} · {{ rotulo(t.tipoTransacao) }} de {{ t.valor != null ? (t.valor | currency) : '—' }}</h2>
+        <p class="texto-suave sem-margem">{{ t.dataHoraTransacao ? (t.dataHoraTransacao | date: 'dd/MM/yyyy HH:mm') : '' }} · canal {{ rotulo(t.canal) }}</p>
+      </div>
+      <button type="button" class="botao-link" (click)="selecionada = null">Fechar</button>
+    </div>
+    <dl class="grade-dados">
+      <div><dt>Cliente de origem</dt><dd>{{ t.clienteOrigem?.nomeRazaoSocial ?? '—' }}</dd></div>
+      <div><dt>Conta de origem</dt><dd>{{ t.contaOrigem?.idConta ?? '—' }}</dd></div>
+      <div><dt>Contraparte</dt><dd>{{ t.nomeContraparte ?? '—' }}</dd></div>
+      <div><dt>Documento da contraparte</dt><dd>{{ t.documentoContraparteFicticio ?? '—' }}</dd></div>
+      <div><dt>Banco da contraparte</dt><dd>{{ t.bancoContraparte ?? '—' }}</dd></div>
+      <div><dt>UF do IP</dt><dd>{{ t.ufIp ?? '—' }}</dd></div>
+      <div><dt>Dispositivo</dt><dd>{{ t.idDispositivo ?? '—' }} ({{ rotulo(t.reputacaoDispositivo) }})</dd></div>
+      <div><dt>Score da transação</dt><dd>{{ t.scoreTransacao ?? '—' }}</dd></div>
+      <div><dt>Status</dt><dd>{{ rotulo(t.statusTransacao) }}</dd></div>
+      <div><dt>Moeda</dt><dd>{{ t.moeda ?? 'BRL' }}</dd></div>
+    </dl>
+    <div class="sinais-detalhe">
+      <strong>Sinais de risco:</strong>
+      @for (s of sinais(t); track s) {
+        <span class="badge badge-alto">{{ s }}</span>
+      } @empty {
+        <span class="texto-fraco">nenhum sinal identificado</span>
+      }
+    </div>
+    @if (t.clienteOrigem?.idCliente) {
+      <div class="acoes">
+        <a class="botao botao-secundario" [routerLink]="['/clientes', t.clienteOrigem!.idCliente]">Ver histórico do cliente</a>
+      </div>
+    }
+  </section>
+}

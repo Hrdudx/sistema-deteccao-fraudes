@@ -1,9 +1,21 @@
 <app-cabecalho-pagina contexto="Gerenciamento de riscos" [titulo]="titulo" [subtitulo]="subtitulo">
+  @if (visao === 'ocorrencias') {
   <button type="button" class="botao botao-secundario" (click)="carregar()" [disabled]="carregando">
     {{ carregando ? 'Atualizando...' : 'Atualizar' }}
   </button>
+  }
 </app-cabecalho-pagina>
 
+<!-- Três visões na mesma tela -->
+<nav class="visoes" aria-label="Visões da tela de ocorrências">
+  <a routerLink="/ocorrencias" [class.ativa]="visao === 'ocorrencias'" [attr.aria-current]="visao === 'ocorrencias' ? 'page' : null">Ocorrências</a>
+  <a routerLink="/ocorrencias/movimentacoes" routerLinkActive="ativa" ariaCurrentWhenActive="page">Movimentações</a>
+  <a routerLink="/ocorrencias/transacional" routerLinkActive="ativa" ariaCurrentWhenActive="page">Transacional</a>
+</nav>
+
+@if (visao !== 'ocorrencias') {
+  <app-transacoes [visao]="$any(visao)"></app-transacoes>
+} @else {
 @if (demonstracao && !carregando) {
   <div class="aviso" role="status">
     <span>Backend indisponível — exibindo <strong>dados de demonstração</strong>.</span>
@@ -186,4 +198,6 @@
       </div>
     }
   </section>
+}
+
 }

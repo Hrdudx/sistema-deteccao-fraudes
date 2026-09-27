@@ -103,6 +103,10 @@ visível, para a apresentação não depender do backend no ar. A base de demons
 - **SLA:** o dicionário de dados ainda não tem prazo de SLA por ocorrência. A Home já
   calcula o SLA quando o backend enviar o campo `prazoSla`; até lá mostra
   "SLA ainda indisponível" com dados reais (a demonstração simula prazos).
+- **Tela Ocorrências** com três visões: *Ocorrências* (fila de PLD, Chargeback, KYC e
+  Fraude), *Movimentações* (todas as transações — `GET /api/transacoes`) e
+  *Transacional* (transações com sinal de risco: score ≥ 60, fora do perfil, em análise
+  ou negadas). Transações são contexto financeiro da análise, não categoria de ocorrência.
 - **Categorias:** somente PLD, Chargeback, KYC e Fraude. O modelo visual trazia
   "Movimentações" e "Transacional", mas o DRE (RN07/RN08) e o DMS (9.4) proíbem essas
   categorias — por isso ficaram de fora.

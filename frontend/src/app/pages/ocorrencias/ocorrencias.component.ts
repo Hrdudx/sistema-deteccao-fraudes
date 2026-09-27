@@ -7,6 +7,7 @@ import { OcorrenciasService } from '../../services/ocorrencias.service';
 import { CabecalhoPaginaComponent } from '../../components/cabecalho-pagina/cabecalho-pagina.component';
 import { BadgeRiscoComponent } from '../../components/badge-risco/badge-risco.component';
 import { EstadoListaComponent } from '../../components/estado-lista/estado-lista.component';
+import { TransacoesComponent, VisaoTransacoes } from './transacoes/transacoes.component';
 import {
   NivelRisco,
   PESO_RISCO,
@@ -39,6 +40,7 @@ const ITENS_POR_PAGINA = 15;
     CabecalhoPaginaComponent,
     BadgeRiscoComponent,
     EstadoListaComponent,
+    TransacoesComponent,
   ],
   templateUrl: './ocorrencias.component.html',
   styleUrl: './ocorrencias.component.css',
@@ -50,6 +52,10 @@ export class OcorrenciasComponent implements OnInit {
   readonly situacoes = Object.entries(ROTULOS_SITUACAO) as [Situacao, string][];
 
   categoria: CategoriaOcorrencia | null = null;
+  // Tela única "Ocorrências" com três visões: a fila de ocorrências (PLD,
+  // Chargeback, KYC e Fraude) e as transações como contexto (Movimentações e
+  // Transacional — que NÃO são categorias de ocorrência, DRE RN08).
+  visao: 'ocorrencias' | VisaoTransacoes = 'ocorrencias';
 
   todas: Ocorrencia[] = [];
   carregando = true;
@@ -73,6 +79,7 @@ export class OcorrenciasComponent implements OnInit {
   ngOnInit(): void {
     this.route.data.subscribe((dados) => {
       this.categoria = (dados['categoria'] as CategoriaOcorrencia | undefined) ?? null;
+      this.visao = (dados['visao'] as VisaoTransacoes | undefined) ?? 'ocorrencias';
       this.selecionada = null;
       this.pagina = 1;
     });
@@ -103,10 +110,13 @@ export class OcorrenciasComponent implements OnInit {
   }
 
   get titulo(): string {
+    if (this.visao === 'movimentacoes') return 'Ocorrências — Movimentações';
+    if (this.visao === 'transacional') return 'Ocorrências — Transacional';
     return this.categoria ? `Ocorrências ${this.categoria}` : 'Ocorrências';
   }
 
   get subtitulo(): string {
+    if (this.visao !== 'ocorrencias') return 'Contexto financeiro para a análise das ocorrências';
     return this.categoria
       ? `Fila de alertas de ${this.categoria} aguardando análise`
       : 'Fila de alertas e ocorrências aguardando análise';

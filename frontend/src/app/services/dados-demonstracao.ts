@@ -113,20 +113,36 @@ const clienteDoIndice = (i: number) => CLIENTES_DEMONSTRACAO[(i * 7 + 3) % CLIEN
 // Prazos usados SOMENTE para simular o SLA na demonstração (o backend ainda não os define).
 const PRAZO_DEMO_HORAS = { PLD: 72, Chargeback: 120, KYC: 48, Fraude: 24 };
 
-export const TRANSACOES_DEMONSTRACAO: (TransacaoApi & { idCliente: string })[] = [];
+export const TRANSACOES_DEMONSTRACAO: TransacaoApi[] = [];
+const BANCOS = ['Banco Digital Alfa', 'Banco Horizonte', 'Cooperativa Cerrado', 'Banco Nacional Beta', 'Instituição Interna'];
 
-function transacaoPara(cliente: ClienteApi, data: Date, valorTransacao: number): string {
+// Registra uma transação em fato_transacao. As ligadas a alertas nascem com sinais
+// de risco (score alto, favorecido novo, fora do perfil...); as demais, normais.
+function transacaoPara(cliente: ClienteApi, data: Date, valorTransacao: number, suspeita = true): string {
   const id = codigo('TRX', TRANSACOES_DEMONSTRACAO.length + 1, 6);
+  const externo = aleatorio() < 0.7;
+  const hora = somarHoras(data, -inteiro(1, 20) / 10);
   TRANSACOES_DEMONSTRACAO.push({
     idTransacao: id,
-    idCliente: cliente.idCliente,
-    dataHoraTransacao: isoDataHora(somarHoras(data, -inteiro(1, 20) / 10)),
-    tipoTransacao: escolher(['PIX', 'PIX', 'TED', 'BOLETO', 'TRANSFERENCIA_INTERNA']),
+    dataHoraTransacao: isoDataHora(hora),
+    tipoTransacao: escolher(['PIX', 'PIX', 'PIX', 'TED', 'BOLETO', 'TRANSFERENCIA_INTERNA']),
     valor: valorTransacao,
+    moeda: 'BRL',
     canal: cliente.origemCadastro,
-    nomeContraparte: aleatorio() < 0.5 ? `${escolher(NOMES)} ${escolher(SOBRENOMES)}` : `${escolher(EMPRESAS)} Pagamentos Ltda.`,
-    scoreTransacao: inteiro(35, 98),
-    statusTransacao: escolher(['APROVADA', 'EM_ANALISE', 'NEGADA']),
+    clienteOrigem: cliente,
+    contaOrigem: { idConta: codigo('CTA', Number(cliente.idCliente.replace(/\D/g, ''))) },
+    clienteDestino: externo ? null : escolher(CLIENTES_DEMONSTRACAO),
+    nomeContraparte: aleatorio() < 0.6 ? `${escolher(NOMES)} ${escolher(SOBRENOMES)}` : `${escolher(EMPRESAS)} Pagamentos Ltda.`,
+    documentoContraparteFicticio: codigo('DOC-EXT-', inteiro(1, 999)),
+    bancoContraparte: externo ? escolher(BANCOS.slice(0, 4)) : 'Instituição Interna',
+    ufIp: aleatorio() < 0.8 ? cliente.uf : escolher(['SP', 'RJ', 'PR', 'BA', 'PA']),
+    idDispositivo: codigo('DEV', inteiro(1, 400)),
+    reputacaoDispositivo: suspeita ? escolher(['NEUTRA', 'RUIM', 'RUIM']) : escolher(['BOA', 'BOA', 'BOA', 'NEUTRA']),
+    horarioAtipico: suspeita ? aleatorio() < 0.5 : aleatorio() < 0.05,
+    novoFavorecido: suspeita ? aleatorio() < 0.7 : aleatorio() < 0.15,
+    foraPerfil: suspeita ? aleatorio() < 0.6 : false,
+    scoreTransacao: suspeita ? inteiro(60, 98) : inteiro(2, 45),
+    statusTransacao: suspeita ? escolher(['EM_ANALISE', 'EM_ANALISE', 'NEGADA', 'APROVADA']) : 'APROVADA',
   });
   return id;
 }
@@ -229,6 +245,14 @@ export const ALERTAS_FRAUDE_DEMONSTRACAO: AlertaFraudeApi[] = Array.from({ lengt
   };
 });
 
+// Movimentações do dia a dia (sem alerta), para a visão "Movimentações".
+for (let i = 0; i < 260; i++) {
+  const cliente = CLIENTES_DEMONSTRACAO[(i * 11 + 5) % CLIENTES_DEMONSTRACAO.length];
+  const valorNormal = aleatorio() < 0.8 ? valor(15, 2500) : valor(2500, 15000);
+  transacaoPara(cliente, dataRelativa(i % 7 === 0 ? 0 : inteiro(0, 40)), valorNormal, false);
+}
+TRANSACOES_DEMONSTRACAO.sort((a, b) => (b.dataHoraTransacao ?? '').localeCompare(a.dataHoraTransacao ?? ''));
+
 // --------------------------------------------------- Histórico do cliente
 export function historicoDemonstracao(idCliente: string): ClienteHistoricoApi | null {
   const cliente = CLIENTES_DEMONSTRACAO.find((c) => c.idCliente === idCliente);
@@ -262,7 +286,7 @@ export function historicoDemonstracao(idCliente: string): ClienteHistoricoApi | 
   return {
     cliente,
     contas,
-    transacoes: TRANSACOES_DEMONSTRACAO.filter((t) => t.idCliente === idCliente),
+    transacoes: TRANSACOES_DEMONSTRACAO.filter((t) => t.clienteOrigem?.idCliente === idCliente),
     alertasPld,
     alertasFraude,
     chargebacks,

@@ -28,6 +28,18 @@ export const routes: Routes = [
     title: 'Histórico do cliente · SGR',
   },
   { path: 'ocorrencias', loadComponent: ocorrencias, title: 'Ocorrências · SGR' },
+  {
+    path: 'ocorrencias/movimentacoes',
+    loadComponent: ocorrencias,
+    data: { visao: 'movimentacoes' },
+    title: 'Movimentações · SGR',
+  },
+  {
+    path: 'ocorrencias/transacional',
+    loadComponent: ocorrencias,
+    data: { visao: 'transacional' },
+    title: 'Transacional · SGR',
+  },
   { path: 'ocorrencias/pld', loadComponent: ocorrencias, data: { categoria: 'PLD' }, title: 'PLD · SGR' },
   {
     path: 'ocorrencias/chargeback',

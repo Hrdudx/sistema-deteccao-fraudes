@@ -27,15 +27,28 @@ export interface ContaApi {
   saldoMedio30d?: number | null;
 }
 
+// fato_transacao — movimentações exclusivamente digitais e nacionais, em BRL
 export interface TransacaoApi {
   idTransacao: string;
   dataHoraTransacao?: string | null;
-  tipoTransacao?: string | null;
+  tipoTransacao?: string | null; // PIX | TED | BOLETO | TRANSFERENCIA_INTERNA
   valor?: number | null;
-  canal?: string | null;
+  moeda?: string | null;
+  canal?: string | null; // APP | WEB
+  clienteOrigem?: ClienteApi | null;
+  contaOrigem?: { idConta: string } | null;
+  clienteDestino?: ClienteApi | null;
   nomeContraparte?: string | null;
-  scoreTransacao?: number | null;
-  statusTransacao?: string | null;
+  documentoContraparteFicticio?: string | null;
+  bancoContraparte?: string | null;
+  ufIp?: string | null;
+  idDispositivo?: string | null;
+  reputacaoDispositivo?: string | null; // BOA | NEUTRA | RUIM
+  horarioAtipico?: boolean | null;
+  novoFavorecido?: boolean | null;
+  foraPerfil?: boolean | null;
+  scoreTransacao?: number | null; // 0 a 100
+  statusTransacao?: string | null; // APROVADA | NEGADA | EM_ANALISE
 }
 
 // Campo ainda inexistente no backend; previsto para o cálculo de SLA (RN14).
