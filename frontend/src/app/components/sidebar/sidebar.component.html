@@ -1,30 +1,52 @@
-<nav class="sidebar">
-  <div class="logo">
-    <strong>SGR</strong>
-    <span>Sistema de Gerenciamento de Riscos</span>
-  </div>
+<nav class="sidebar" [class.aberto]="aberto" aria-label="Menu principal">
+  <a class="logo" routerLink="/home">
+    <app-icone nome="escudo" [tamanho]="36"></app-icone>
+    <span>
+      <strong>SGR</strong>
+      <small>Sistema de Gerenciamento de Riscos</small>
+    </span>
+  </a>
 
-  <ul>
+  <ul class="itens">
     <li *ngFor="let item of itensPrincipais">
-      <a [routerLink]="item.rota" routerLinkActive="ativo">{{ item.rotulo }}</a>
+      <a [routerLink]="item.rota" routerLinkActive="ativo" ariaCurrentWhenActive="page">
+        <app-icone [nome]="item.icone"></app-icone>{{ item.rotulo }}
+      </a>
     </li>
 
     <li>
-      <button type="button" class="item-expansivel" (click)="ocorrenciasAbertas = !ocorrenciasAbertas">
-        Ocorrências
-        <span>{{ ocorrenciasAbertas ? '▾' : '▸' }}</span>
-      </button>
-      <ul class="submenu" *ngIf="ocorrenciasAbertas">
+      <div class="grupo" [class.pai-ativo]="emOcorrencias">
+        <a routerLink="/ocorrencias" routerLinkActive="ativo" [routerLinkActiveOptions]="{ exact: true }" ariaCurrentWhenActive="page">
+          <app-icone nome="ocorrencias"></app-icone>Ocorrências
+        </a>
+        <button
+          type="button"
+          class="alternar"
+          (click)="ocorrenciasAbertas = !ocorrenciasAbertas"
+          [attr.aria-expanded]="ocorrenciasAbertas"
+          aria-controls="submenu-ocorrencias"
+          [attr.aria-label]="ocorrenciasAbertas ? 'Recolher categorias de ocorrências' : 'Expandir categorias de ocorrências'"
+        >
+          <app-icone nome="seta" [tamanho]="16" [class.recolhida]="!ocorrenciasAbertas"></app-icone>
+        </button>
+      </div>
+      <ul class="submenu" id="submenu-ocorrencias" *ngIf="ocorrenciasAbertas">
         <li *ngFor="let categoria of categoriasOcorrencias">
-          <a [routerLink]="categoria.rota" routerLinkActive="ativo">{{ categoria.rotulo }}</a>
+          <a [routerLink]="categoria.rota" routerLinkActive="ativo" ariaCurrentWhenActive="page">
+            <app-icone [nome]="categoria.icone" [tamanho]="17"></app-icone>{{ categoria.rotulo }}
+          </a>
         </li>
       </ul>
     </li>
 
-    <li *ngFor="let item of itensFinais">
-      <a [routerLink]="item.rota" routerLinkActive="ativo">{{ item.rotulo }}</a>
+    <li *ngFor="let item of itensFinaisVisiveis">
+      <a [routerLink]="item.rota" routerLinkActive="ativo" ariaCurrentWhenActive="page">
+        <app-icone [nome]="item.icone"></app-icone>{{ item.rotulo }}
+      </a>
     </li>
   </ul>
 
-  <a class="sair" routerLink="/login">Sair</a>
+  <button type="button" class="sair" (click)="sair.emit()">
+    <app-icone nome="sair"></app-icone>Sair
+  </button>
 </nav>

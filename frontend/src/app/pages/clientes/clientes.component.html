@@ -1,0 +1,107 @@
+<app-cabecalho-pagina contexto="Cadastro" titulo="Clientes" subtitulo="Consulte clientes e acesse o histórico de análises de risco">
+  <button type="button" class="botao botao-secundario" (click)="carregar()" [disabled]="carregando">
+    {{ carregando ? 'Atualizando...' : 'Atualizar' }}
+  </button>
+</app-cabecalho-pagina>
+
+@if (demonstracao && !carregando) {
+  <div class="aviso" role="status">
+    <span>Backend indisponível — exibindo <strong>dados de demonstração</strong>.</span>
+  </div>
+}
+
+<section class="card" aria-label="Filtros de pesquisa">
+  <form class="filtros" (submit)="$event.preventDefault()">
+    <div class="campo">
+      <label for="busca-cliente">Buscar cliente</label>
+      <input
+        id="busca-cliente"
+        type="search"
+        placeholder="Nome, CPF/CNPJ, código ou cidade"
+        [(ngModel)]="busca"
+        name="busca"
+        (ngModelChange)="pagina = 1"
+        autocomplete="off"
+      />
+    </div>
+    <div class="campo">
+      <label for="tipo-pessoa">Tipo de pessoa</label>
+      <select id="tipo-pessoa" [(ngModel)]="tipoPessoa" name="tipoPessoa" (ngModelChange)="pagina = 1">
+        <option value="">Todos</option>
+        <option value="PF">Pessoa Física</option>
+        <option value="PJ">Pessoa Jurídica</option>
+      </select>
+    </div>
+    <div class="campo">
+      <label for="status-cliente">Situação</label>
+      <select id="status-cliente" [(ngModel)]="status" name="status" (ngModelChange)="pagina = 1">
+        <option value="">Todas</option>
+        @for (s of opcoesStatus; track s) {
+          <option [value]="s">{{ rotulo(s) }}</option>
+        }
+      </select>
+    </div>
+    <div class="acoes">
+      <button type="button" class="botao botao-secundario" (click)="limparFiltros()" [disabled]="!filtrosAtivos">
+        Limpar filtros
+      </button>
+    </div>
+  </form>
+</section>
+
+<section class="card" aria-labelledby="titulo-clientes">
+  <div class="card-cabecalho">
+    <h2 id="titulo-clientes">Clientes encontrados</h2>
+    @if (!carregando && !erro) {
+      <span class="badge badge-info" aria-live="polite">{{ filtrados.length }} cliente(s)</span>
+    }
+  </div>
+
+  <app-estado-lista
+    [carregando]="carregando"
+    [erro]="erro"
+    [vazio]="!filtrados.length"
+    mensagemCarregando="Carregando clientes..."
+    [mensagemVazio]="filtrosAtivos ? 'Cliente não encontrado. Revise os termos da busca.' : 'Nenhum cliente cadastrado.'"
+    (tentarNovamente)="carregar()"
+  ></app-estado-lista>
+
+  @if (!carregando && !erro && filtrados.length) {
+    <div class="tabela-rolagem">
+      <table class="tabela">
+        <thead>
+          <tr>
+            <th scope="col">Código</th>
+            <th scope="col">Nome / Razão social</th>
+            <th scope="col">CPF/CNPJ</th>
+            <th scope="col">Tipo</th>
+            <th scope="col">Cidade</th>
+            <th scope="col">Situação</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (c of paginaAtual; track c.idCliente) {
+            <tr class="clicavel" tabindex="0" (click)="abrir(c)" (keydown.enter)="abrir(c)" [attr.aria-label]="'Abrir histórico de ' + c.nomeRazaoSocial">
+              <td class="id">{{ c.idCliente }}</td>
+              <td>{{ c.nomeRazaoSocial }}</td>
+              <td>{{ c.documentoFicticio }}</td>
+              <td>{{ tipo(c) }}</td>
+              <td>{{ c.cidade ? c.cidade + (c.uf ? '/' + c.uf : '') : '—' }}</td>
+              <td><span class="badge">{{ rotulo(c.statusCliente) }}</span></td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    @if (totalPaginas > 1) {
+      <nav class="paginacao" aria-label="Paginação">
+        <button type="button" class="botao botao-secundario" (click)="pagina = pagina - 1" [disabled]="pagina <= 1">‹ Anterior</button>
+        <span>Página {{ pagina }} de {{ totalPaginas }}</span>
+        <button type="button" class="botao botao-secundario" (click)="pagina = pagina + 1" [disabled]="pagina >= totalPaginas">
+          Próxima ›
+        </button>
+      </nav>
+    }
+  }
+</section>

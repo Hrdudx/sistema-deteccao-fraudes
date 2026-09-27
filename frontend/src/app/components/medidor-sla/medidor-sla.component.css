@@ -1,0 +1,65 @@
+.medidor svg {
+  display: block;
+  width: 100%;
+  max-width: 260px;
+  margin: 0 auto 12px;
+}
+
+.trilha,
+.faixa {
+  fill: none;
+  stroke-width: 18;
+}
+
+.trilha {
+  stroke: var(--cor-borda-suave);
+}
+
+.percentual {
+  font-size: 30px;
+  font-weight: 700;
+  fill: var(--cor-texto);
+}
+
+.legenda-centro {
+  font-size: 10px;
+  fill: var(--cor-texto-fraco);
+}
+
+.cartoes {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.cartao {
+  border: 1px solid var(--cor-borda);
+  border-radius: 8px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+}
+
+.titulo {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  color: var(--cor-texto-suave);
+}
+
+.ponto {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.cartao strong {
+  font-size: 1.2rem;
+}
+
+.cartao small {
+  color: var(--cor-texto-fraco);
+  font-size: 0.75rem;
+}

@@ -1,66 +1,199 @@
-<div class="home">
-  <h1>Home</h1>
-  <p>Visão geral da operação de riscos financeiros</p>
+<app-cabecalho-pagina titulo="Home" subtitulo="Visão geral do gerenciamento de riscos">
+  <div class="campo campo-periodo">
+    <label for="periodo-home" class="sr-only">Período</label>
+    <select id="periodo-home" [(ngModel)]="periodo" (ngModelChange)="carregarIndicadores()" [disabled]="carregando">
+      @for (p of periodos; track p[0]) {
+        <option [value]="p[0]">{{ p[1] }}</option>
+      }
+    </select>
+  </div>
+</app-cabecalho-pagina>
 
-  <p *ngIf="carregando">Carregando dados da operação...</p>
-  <p *ngIf="erro" class="erro">{{ erro }}</p>
+@if (demonstracao && !carregando) {
+  <div class="aviso" role="status">
+    <span>Backend indisponível — exibindo <strong>dados de demonstração</strong>. Inicie a API para ver os dados reais.</span>
+  </div>
+}
 
-  <ng-container *ngIf="indicadores as dados">
-    <div class="kpi-grid">
-      <div class="kpi-card">
-        <span>Ocorrências abertas</span>
-        <strong>{{ dados.ocorrenciasAbertas }}</strong>
-        <small>{{ dados.ocorrenciasCriticas }} críticas · {{ dados.ocorrenciasAltas }} altas</small>
-      </div>
-      <div class="kpi-card">
-        <span>Tratativas concluídas</span>
-        <strong>{{ dados.tratativasConcluidasHoje }}</strong>
-        <small>Hoje</small>
-      </div>
-      <div class="kpi-card">
-        <span>SLA dentro do prazo</span>
-        <strong>{{ dados.slaPercentualDentroPrazo }}%</strong>
-      </div>
-      <div class="kpi-card">
-        <span>SLA vencido</span>
-        <strong>{{ dados.slaVencidas }}</strong>
-        <small>Exige priorização</small>
-      </div>
+<app-estado-lista
+  [carregando]="carregando && !indicadores"
+  [erro]="erro"
+  mensagemCarregando="Carregando dados da operação..."
+  (tentarNovamente)="carregarIndicadores()"
+></app-estado-lista>
+
+@if (indicadores; as d) {
+  <div class="conteudo-home" [class.atualizando]="carregando">
+    <h2 class="titulo-secao">{{ tituloResumo }}</h2>
+
+    <!-- Cards principais -->
+    <div class="kpis">
+      <a class="kpi" routerLink="/clientes">
+        <span class="kpi-icone tom-azul"><app-icone nome="clientes" [tamanho]="26"></app-icone></span>
+        <span class="kpi-texto">
+          <span>Clientes</span>
+          <strong>{{ d.clientesCadastrados !== null ? (d.clientesCadastrados | number) : '—' }}</strong>
+          <small>cadastrados</small>
+        </span>
+      </a>
+      <a class="kpi" routerLink="/ocorrencias">
+        <span class="kpi-icone tom-verde"><app-icone nome="ocorrencias" [tamanho]="26"></app-icone></span>
+        <span class="kpi-texto">
+          <span>Ocorrências</span>
+          <strong>{{ d.ocorrenciasAbertas | number }}</strong>
+          <small>abertas</small>
+        </span>
+      </a>
+      <a class="kpi" routerLink="/ocorrencias" [queryParams]="{ situacao: 'emTratativa' }">
+        <span class="kpi-icone tom-amarelo"><app-icone nome="andamento" [tamanho]="26"></app-icone></span>
+        <span class="kpi-texto">
+          <span>Tratativas em andamento</span>
+          <strong>{{ d.tratativasEmAndamento | number }}</strong>
+          <small>em análise</small>
+        </span>
+      </a>
+      <a class="kpi" routerLink="/ocorrencias" [queryParams]="{ situacao: 'concluida' }">
+        <span class="kpi-icone tom-verde"><app-icone nome="concluido" [tamanho]="26"></app-icone></span>
+        <span class="kpi-texto">
+          <span>Tratativas concluídas ({{ rotuloPeriodo }})</span>
+          <strong>{{ d.tratativasConcluidasPeriodo | number }}</strong>
+          <small>concluídas</small>
+        </span>
+      </a>
+      <a class="kpi" routerLink="/ocorrencias" [queryParams]="{ risco: 'altoOuCritico' }">
+        <span class="kpi-icone tom-vermelho"><app-icone nome="alerta" [tamanho]="26"></app-icone></span>
+        <span class="kpi-texto">
+          <span>Riscos identificados</span>
+          <strong>{{ d.riscosIdentificadosPeriodo | number }}</strong>
+          <small>alto/crítico · {{ rotuloPeriodo === 'mês' ? 'neste mês' : rotuloPeriodo }}</small>
+        </span>
+      </a>
     </div>
 
-    <section class="ocorrencias-por-tipo">
-      <h2>Ocorrências por tipo</h2>
-      <div class="linha-tipo" *ngFor="let item of tiposDeOcorrencia">
-        <span>{{ item.tipo }}</span>
-        <strong>{{ item.total }}</strong>
-      </div>
+    <!-- Gráficos -->
+    <div class="linha-graficos">
+      <section class="card" aria-labelledby="titulo-tipo">
+        <h2 id="titulo-tipo">Ocorrências por tipo</h2>
+        <app-grafico-rosca [fatias]="fatiasTipo(d)" descricao="Ocorrências por tipo no período"></app-grafico-rosca>
+      </section>
+
+      <section class="card" aria-labelledby="titulo-status">
+        <h2 id="titulo-status">Status das ocorrências</h2>
+        <app-grafico-rosca [fatias]="fatiasStatus(d)" descricao="Status das ocorrências no período"></app-grafico-rosca>
+      </section>
+
+      <section class="card" aria-labelledby="titulo-sla">
+        <h2 id="titulo-sla">SLA Geral</h2>
+        @if (d.sla) {
+          <app-medidor-sla [sla]="d.sla"></app-medidor-sla>
+        } @else {
+          <div class="sem-sla">
+            <app-icone nome="relogio" [tamanho]="32"></app-icone>
+            <strong>SLA ainda indisponível</strong>
+            <p>A base de dados ainda não informa o prazo de SLA das ocorrências. O indicador aparece assim que o backend enviar essa informação.</p>
+          </div>
+        }
+      </section>
+    </div>
+
+    <div class="linha-sla">
+      <section class="card" aria-labelledby="titulo-sla-tipo">
+        <h2 id="titulo-sla-tipo">SLA por tipo de ocorrência</h2>
+        <div class="tabela-rolagem">
+          <table class="tabela tabela-sla">
+            <thead>
+              <tr>
+                <th scope="col">Tipo de ocorrência</th>
+                <th scope="col" class="numero">Ocorrências</th>
+                <th scope="col" class="numero">Dentro do prazo</th>
+                <th scope="col" class="numero">Atenção</th>
+                <th scope="col" class="numero">Vencidos</th>
+                <th scope="col">SLA</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (linha of linhasSla(d); track linha.tipo) {
+                <tr>
+                  <td>
+                    <a class="tipo" [routerLink]="rotaCategoria(linha.tipo)">
+                      <span class="tipo-icone" [style.color]="linha.cor"><app-icone [nome]="linha.icone" [tamanho]="16"></app-icone></span>
+                      {{ linha.tipo }}
+                    </a>
+                  </td>
+                  <td class="numero">{{ linha.total | number }}</td>
+                  @if (linha.sla; as s) {
+                    <td class="numero texto-dentro">{{ s.dentroPrazo }} ({{ percentual(s.dentroPrazo, s.total) }}%)</td>
+                    <td class="numero texto-atencao">{{ s.atencao }} ({{ percentual(s.atencao, s.total) }}%)</td>
+                    <td class="numero texto-vencido">{{ s.vencidas }} ({{ percentual(s.vencidas, s.total) }}%)</td>
+                    <td>
+                      <span class="barra-sla">
+                        <strong>{{ percentual(s.dentroPrazo, s.total) }}%</strong>
+                        <span class="trilha" aria-hidden="true"><span [style.width.%]="percentual(s.dentroPrazo, s.total)"></span></span>
+                      </span>
+                    </td>
+                  } @else {
+                    <td class="numero texto-fraco">—</td>
+                    <td class="numero texto-fraco">—</td>
+                    <td class="numero texto-fraco">—</td>
+                    <td class="texto-fraco">sem prazo</td>
+                  }
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        <a routerLink="/ocorrencias" class="ver-todas">Ver todas as ocorrências <app-icone nome="direita" [tamanho]="14"></app-icone></a>
+      </section>
+
+      <section class="card" aria-labelledby="titulo-prioridade">
+        <h2 id="titulo-prioridade">Ocorrências por prioridade</h2>
+        <app-grafico-rosca [fatias]="fatiasPrioridade(d)" descricao="Ocorrências por prioridade no período"></app-grafico-rosca>
+      </section>
+    </div>
+
+    <!-- Resumo do dia (DMS 9.2: abaixo do resumo do mês) -->
+    <section class="card" aria-labelledby="titulo-dia">
+      <h2 id="titulo-dia">Resumo do dia</h2>
+      <ul class="resumo-dia">
+        <li>
+          <span class="kpi-icone tom-azul"><app-icone nome="novo" [tamanho]="24"></app-icone></span>
+          <span class="kpi-texto"><span>Novas ocorrências</span><strong>{{ d.resumoDoDia.novasOcorrencias }}</strong><small>hoje</small></span>
+        </li>
+        <li>
+          <span class="kpi-icone tom-azul"><app-icone nome="calendario" [tamanho]="24"></app-icone></span>
+          <span class="kpi-texto">
+            <span>Tratativas iniciadas</span><strong>{{ d.resumoDoDia.tratativasIniciadas ?? '—' }}</strong>
+            <small>{{ d.resumoDoDia.tratativasIniciadas !== null ? 'hoje' : 'sem registro na base' }}</small>
+          </span>
+        </li>
+        <li>
+          <span class="kpi-icone tom-verde"><app-icone nome="concluido" [tamanho]="24"></app-icone></span>
+          <span class="kpi-texto"><span>Tratativas concluídas</span><strong>{{ d.resumoDoDia.tratativasConcluidas }}</strong><small>hoje</small></span>
+        </li>
+        <li>
+          <span class="kpi-icone tom-roxo"><app-icone nome="relogio" [tamanho]="24"></app-icone></span>
+          <span class="kpi-texto">
+            <span>SLA vencendo hoje</span><strong>{{ d.resumoDoDia.slaVencendoHoje ?? '—' }}</strong>
+            <small>{{ d.resumoDoDia.slaVencendoHoje !== null ? 'atenção necessária' : 'sem prazo na base' }}</small>
+          </span>
+        </li>
+        <li>
+          <span class="kpi-icone tom-vermelho"><app-icone nome="alerta" [tamanho]="24"></app-icone></span>
+          <span class="kpi-texto">
+            <span>SLA vencidos</span><strong>{{ d.resumoDoDia.slaVencidos ?? '—' }}</strong>
+            <small>{{ d.resumoDoDia.slaVencidos !== null ? 'ação imediata' : 'sem prazo na base' }}</small>
+          </span>
+        </li>
+      </ul>
     </section>
 
-    <!-- Bloco principal conforme o DMS (seção 9.2): Resumo do mês vem antes do Resumo do dia -->
-    <section class="resumo-mes">
-      <h2>Resumo do mês</h2>
-      <table>
-        <tr *ngFor="let item of dados.resumoDoMes">
-          <td>{{ item.prioridade }}</td>
-          <td>{{ item.ocorrencia }}</td>
-          <td>{{ item.cliente }}</td>
-          <td>{{ item.valor | currency: 'BRL' }}</td>
-          <td>{{ item.slaRestante }}</td>
-        </tr>
-      </table>
-    </section>
-
-    <section class="resumo-dia">
-      <h2>Resumo do dia</h2>
-      <table>
-        <tr *ngFor="let item of dados.resumoDoDia">
-          <td [class]="'prioridade-' + item.prioridade.toLowerCase()">{{ item.prioridade }}</td>
-          <td>{{ item.ocorrencia }}</td>
-          <td>{{ item.cliente }}</td>
-          <td>{{ item.valor | currency: 'BRL' }}</td>
-          <td>{{ item.slaRestante }}</td>
-        </tr>
-      </table>
-    </section>
-  </ng-container>
-</div>
+    <footer class="rodape">
+      @if (atualizadoEm) {
+        <span>Última atualização: {{ atualizadoEm | date: 'dd/MM/yyyy HH:mm' }}</span>
+      }
+      <button type="button" class="botao-icone" (click)="carregarIndicadores()" [disabled]="carregando" aria-label="Atualizar indicadores">
+        <app-icone nome="atualizar" [tamanho]="16" [class.girando]="carregando"></app-icone>
+      </button>
+    </footer>
+  </div>
+}

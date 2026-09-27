@@ -1,1 +1,572 @@
-/* You can add global styles to this file, and also import other style files */
+/*
+ * Estilos globais do SGR (Sprint 4 — ajustes de usabilidade).
+ * Tokens de cor, tipografia e componentes visuais reutilizados por todas as telas
+ * (cartões, tabelas, badges de risco, botões e campos de formulário), para que
+ * cada tela nova já nasça com o mesmo padrão visual do protótipo.
+ */
+
+:root {
+  --cor-fundo: #f5f7fb;
+  --cor-superficie: #ffffff;
+  --cor-borda: #e2e8f0;
+  --cor-borda-suave: #eef2f7;
+  --cor-texto: #0f172a;
+  --cor-texto-suave: #475569;
+  --cor-texto-fraco: #64748b;
+
+  /* Menu lateral claro (modelo aprovado pela equipe) */
+  --cor-menu: #ffffff;
+  --cor-menu-hover: #f1f5f9;
+  --cor-menu-ativo: #eaf1fe;
+
+  --cor-primaria: #1d4ed8;
+  --cor-primaria-hover: #1e40af;
+  --cor-primaria-fundo: #eff6ff;
+
+  --cor-critico: #b91c1c;
+  --cor-critico-fundo: #fef2f2;
+  --cor-alto: #c2410c;
+  --cor-alto-fundo: #fff7ed;
+  --cor-medio: #a16207;
+  --cor-medio-fundo: #fefce8;
+  --cor-baixo: #15803d;
+  --cor-baixo-fundo: #f0fdf4;
+  --cor-neutro-fundo: #f1f5f9;
+
+  /* Cores de dados — validadas para daltonismo (scripts do guia de dataviz).
+     A cor acompanha a entidade em todas as telas. */
+  --serie-pld: #2563eb;
+  --serie-chargeback: #ea8a1a;
+  --serie-kyc: #16a37f;
+  --serie-fraude: #8b5cf6;
+
+  --situacao-pendente: #d99a00;
+  --situacao-tratativa: #2563eb;
+  --situacao-concluida: #16a37f;
+
+  --prioridade-critica: #a61b1b;
+  --prioridade-alta: #e8590c;
+  --prioridade-media: #d4a000;
+  --prioridade-baixa: #15925a;
+
+  --sla-dentro: #15925a;
+  --sla-atencao: #d4a000;
+  --sla-vencido: #c81e1e;
+  /* Versões escuras para texto (contraste AA sobre branco) */
+  --sla-dentro-texto: #15803d;
+  --sla-atencao-texto: #a16207;
+  --sla-vencido-texto: #b91c1c;
+
+  --raio: 10px;
+  --sombra: 0 1px 2px rgba(15, 23, 42, 0.04);
+  --foco: 0 0 0 3px rgba(29, 78, 216, 0.35);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  background: var(--cor-fundo);
+  color: var(--cor-texto);
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3 {
+  margin: 0;
+  line-height: 1.25;
+  color: var(--cor-texto);
+}
+
+h1 {
+  font-size: 1.75rem;
+  font-weight: 700;
+}
+
+h2 {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+h3 {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+a {
+  color: var(--cor-primaria);
+}
+
+/* Foco visível para quem navega pelo teclado */
+:focus-visible {
+  outline: none;
+  box-shadow: var(--foco);
+  border-radius: 6px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---------- Cartões ---------- */
+.card {
+  background: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio);
+  box-shadow: var(--sombra);
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+.card-cabecalho {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.texto-suave {
+  color: var(--cor-texto-suave);
+}
+
+.texto-fraco {
+  color: var(--cor-texto-fraco);
+  font-size: 0.85rem;
+}
+
+/* ---------- Tabelas ---------- */
+.tabela-rolagem {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.tabela {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.tabela th {
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.8rem;
+  color: var(--cor-texto-fraco);
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--cor-borda);
+  white-space: nowrap;
+}
+
+.tabela td {
+  padding: 12px 10px;
+  border-bottom: 1px solid var(--cor-borda-suave);
+  vertical-align: middle;
+}
+
+.tabela tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.tabela tr.clicavel {
+  cursor: pointer;
+}
+
+.tabela tr.clicavel:hover td,
+.tabela tr.selecionada td {
+  background: var(--cor-primaria-fundo);
+}
+
+.tabela .numero {
+  text-align: right;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.tabela .id {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* ---------- Badges (risco / status) ---------- */
+.badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  white-space: nowrap;
+  background: var(--cor-neutro-fundo);
+  color: var(--cor-texto-suave);
+}
+
+.badge-critico {
+  background: var(--cor-critico-fundo);
+  color: var(--cor-critico);
+}
+
+.badge-alto {
+  background: var(--cor-alto-fundo);
+  color: var(--cor-alto);
+}
+
+.badge-medio {
+  background: var(--cor-medio-fundo);
+  color: var(--cor-medio);
+}
+
+.badge-baixo {
+  background: var(--cor-baixo-fundo);
+  color: var(--cor-baixo);
+}
+
+.badge-info {
+  background: var(--cor-primaria-fundo);
+  color: var(--cor-primaria);
+}
+
+/* ---------- Botões ---------- */
+.botao {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 9px 16px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  font: inherit;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  text-decoration: none;
+  background: var(--cor-primaria);
+  color: #ffffff;
+  transition: background 0.15s ease;
+}
+
+.botao:hover {
+  background: var(--cor-primaria-hover);
+}
+
+.botao:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.botao-secundario {
+  background: var(--cor-superficie);
+  color: var(--cor-texto);
+  border-color: var(--cor-borda);
+}
+
+.botao-secundario:hover {
+  background: var(--cor-neutro-fundo);
+}
+
+.botao-link {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--cor-primaria);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* ---------- Formulários ---------- */
+.filtros {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px 16px;
+  align-items: end;
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.campo label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--cor-texto-suave);
+}
+
+.campo input,
+.campo select,
+.campo textarea {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid var(--cor-borda);
+  border-radius: 8px;
+  background: var(--cor-superficie);
+  color: var(--cor-texto);
+  font: inherit;
+  font-size: 0.9rem;
+}
+
+.campo input:focus,
+.campo select:focus,
+.campo textarea:focus {
+  outline: none;
+  border-color: var(--cor-primaria);
+  box-shadow: var(--foco);
+}
+
+.acoes {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+/* ---------- Avisos ---------- */
+.aviso {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  margin-bottom: 16px;
+  background: var(--cor-primaria-fundo);
+  color: var(--cor-primaria);
+}
+
+.aviso-erro {
+  background: var(--cor-critico-fundo);
+  color: var(--cor-critico);
+}
+
+/* ---------- Cartões de indicador com ícone ---------- */
+.kpi-icone {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  flex-shrink: 0;
+}
+
+.tom-azul {
+  background: #eaf1fe;
+  color: #2563eb;
+}
+
+.tom-verde {
+  background: #e8f7f0;
+  color: #15925a;
+}
+
+.tom-amarelo {
+  background: #fdf5e1;
+  color: #b7791f;
+}
+
+.tom-vermelho {
+  background: #fdecec;
+  color: #c81e1e;
+}
+
+.tom-roxo {
+  background: #f1edfe;
+  color: #6d4ed8;
+}
+
+.kpi-texto {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.kpi-texto > span {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--cor-texto);
+}
+
+.kpi-texto strong {
+  font-size: 1.6rem;
+  line-height: 1.25;
+}
+
+.kpi-texto small {
+  font-size: 0.8rem;
+  color: var(--cor-texto-fraco);
+}
+
+.botao-icone {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  border: none;
+  border-radius: 6px;
+  background: none;
+  color: var(--cor-texto-suave);
+  cursor: pointer;
+}
+
+.botao-icone:hover {
+  background: var(--cor-neutro-fundo);
+}
+
+.girando {
+  animation: girar 0.8s linear infinite;
+}
+
+@keyframes girar {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ---------- Tabela de SLA (Home) ---------- */
+.tipo {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--cor-texto);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.tipo:hover {
+  color: var(--cor-primaria);
+}
+
+.tipo-icone {
+  display: inline-flex;
+  padding: 4px;
+  border-radius: 50%;
+  background: var(--cor-neutro-fundo);
+}
+
+.texto-dentro {
+  color: var(--sla-dentro-texto);
+}
+
+.texto-atencao {
+  color: var(--sla-atencao-texto);
+}
+
+.texto-vencido {
+  color: var(--sla-vencido-texto);
+}
+
+.barra-sla {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 130px;
+}
+
+.barra-sla strong {
+  width: 38px;
+  font-size: 0.85rem;
+}
+
+.barra-sla .trilha {
+  flex: 1;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--cor-neutro-fundo);
+  overflow: hidden;
+}
+
+.barra-sla .trilha span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--sla-dentro);
+}
+
+/* ---------- Paginação e contadores ---------- */
+.paginacao {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+  font-size: 0.88rem;
+}
+
+.contador {
+  font-size: 0.75rem;
+  background: var(--cor-neutro-fundo);
+  border-radius: 999px;
+  padding: 0 8px;
+}
+
+/* ---------- Grade de dados (detalhes) ---------- */
+.grade-dados {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 14px 20px;
+  margin: 0;
+}
+
+.grade-dados dt {
+  font-size: 0.78rem;
+  color: var(--cor-texto-fraco);
+}
+
+.grade-dados dd {
+  margin: 2px 0 0;
+  font-weight: 600;
+}
+
+@media (max-width: 640px) {
+  h1 {
+    font-size: 1.4rem;
+  }
+
+  .card {
+    padding: 16px;
+  }
+
+  .acoes .botao {
+    flex: 1;
+  }
+}
+
+/* ---------- Impressão (relatórios) ---------- */
+@media print {
+  app-sidebar,
+  .barra-superior,
+  .pular-conteudo,
+  .acoes-cabecalho,
+  .aviso {
+    display: none !important;
+  }
+
+  body {
+    background: #ffffff;
+  }
+
+  .card {
+    box-shadow: none;
+    break-inside: avoid;
+  }
+}

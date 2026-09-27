@@ -1,0 +1,193 @@
+<a routerLink="/clientes" class="voltar">← Voltar para clientes</a>
+
+@if (historico; as h) {
+  <app-cabecalho-pagina
+    contexto="Histórico do cliente"
+    [titulo]="h.cliente.nomeRazaoSocial"
+    [subtitulo]="h.cliente.idCliente + ' · ' + h.cliente.documentoFicticio"
+  >
+    <button type="button" class="botao botao-secundario" (click)="carregar()" [disabled]="carregando">Atualizar</button>
+  </app-cabecalho-pagina>
+} @else {
+  <app-cabecalho-pagina contexto="Histórico do cliente" [titulo]="'Cliente ' + id"></app-cabecalho-pagina>
+}
+
+@if (demonstracao && !carregando) {
+  <div class="aviso" role="status">
+    <span>Backend indisponível — exibindo <strong>dados de demonstração</strong>.</span>
+  </div>
+}
+
+<app-estado-lista
+  [carregando]="carregando"
+  [erro]="erro"
+  [vazio]="naoEncontrado"
+  mensagemCarregando="Carregando histórico do cliente..."
+  mensagemVazio="Cliente não encontrado. Verifique o código informado."
+  (tentarNovamente)="carregar()"
+></app-estado-lista>
+
+@if (!carregando && historico; as h) {
+  <div class="colunas">
+    <section class="card" aria-labelledby="titulo-dados">
+      <h2 id="titulo-dados">Dados cadastrais</h2>
+      <dl class="grade-dados">
+        <div><dt>Tipo de cliente</dt><dd>{{ tipoPessoa(h.cliente.tipoPessoa) }}</dd></div>
+        <div><dt>Situação</dt><dd>{{ rotulo(h.cliente.statusCliente) }}</dd></div>
+        <div><dt>Segmento</dt><dd>{{ rotulo(h.cliente.segmento) }}</dd></div>
+        <div><dt>Cidade/UF</dt><dd>{{ h.cliente.cidade ?? '—' }}{{ h.cliente.uf ? '/' + h.cliente.uf : '' }}</dd></div>
+        <div><dt>Profissão / atividade</dt><dd>{{ h.cliente.profissaoAtividade ?? '—' }}</dd></div>
+        <div>
+          <dt>Renda / faturamento mensal</dt>
+          <dd>{{ h.cliente.rendaFaturamentoMensal != null ? (h.cliente.rendaFaturamentoMensal | currency) : '—' }}</dd>
+        </div>
+        <div><dt>Cliente desde</dt><dd>{{ h.cliente.dataCadastro ? (h.cliente.dataCadastro | date: 'dd/MM/yyyy') : '—' }}</dd></div>
+        <div><dt>Origem do cadastro</dt><dd>{{ rotulo(h.cliente.origemCadastro) }}</dd></div>
+      </dl>
+    </section>
+
+    <section class="card" aria-labelledby="titulo-risco">
+      <h2 id="titulo-risco">Risco consolidado</h2>
+      @if (h.riscoCliente; as r) {
+        <div class="score">
+          <strong>{{ r.scoreRiscoGeral ?? '—' }}</strong>
+          <app-badge-risco [valor]="r.nivelRisco"></app-badge-risco>
+        </div>
+        <dl class="grade-dados">
+          <div><dt>Alertas PLD</dt><dd>{{ r.qtdAlertasPld ?? 0 }}</dd></div>
+          <div><dt>Alertas de fraude</dt><dd>{{ r.qtdAlertasFraude ?? 0 }}</dd></div>
+          <div><dt>Chargebacks</dt><dd>{{ r.qtdChargebacks ?? 0 }}</dd></div>
+          <div><dt>Fraudes confirmadas</dt><dd>{{ r.qtdFraudesConfirmadas ?? 0 }}</dd></div>
+          <div><dt>Perdas</dt><dd>{{ (r.valorPerdas ?? 0) | currency }}</dd></div>
+          <div>
+            <dt>Última avaliação</dt>
+            <dd>{{ r.dataUltimaAvaliacao ? (r.dataUltimaAvaliacao | date: 'dd/MM/yyyy') : '—' }}</dd>
+          </div>
+        </dl>
+      } @else {
+        <p class="texto-suave">Cliente ainda sem avaliação de risco consolidada.</p>
+      }
+    </section>
+  </div>
+
+  <section class="card">
+    <div class="abas" role="tablist" aria-label="Histórico">
+      <button type="button" role="tab" [attr.aria-selected]="aba === 'ocorrencias'" [class.ativa]="aba === 'ocorrencias'" (click)="aba = 'ocorrencias'">
+        Ocorrências <span class="contador">{{ ocorrencias.length }}</span>
+      </button>
+      <button type="button" role="tab" [attr.aria-selected]="aba === 'transacoes'" [class.ativa]="aba === 'transacoes'" (click)="aba = 'transacoes'">
+        Transações <span class="contador">{{ h.transacoes?.length ?? 0 }}</span>
+      </button>
+      <button type="button" role="tab" [attr.aria-selected]="aba === 'contas'" [class.ativa]="aba === 'contas'" (click)="aba = 'contas'">
+        Contas <span class="contador">{{ h.contas?.length ?? 0 }}</span>
+      </button>
+    </div>
+
+    @switch (aba) {
+      @case ('ocorrencias') {
+        @if (ocorrencias.length) {
+          <div class="tabela-rolagem">
+            <table class="tabela">
+              <thead>
+                <tr>
+                  <th scope="col">ID</th>
+                  <th scope="col">Categoria</th>
+                  <th scope="col">Tipo</th>
+                  <th scope="col" class="numero">Valor</th>
+                  <th scope="col">Risco</th>
+                  <th scope="col">Data</th>
+                  <th scope="col">Situação</th>
+                  <th scope="col">Resultado</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (o of ocorrencias; track o.categoria + o.id) {
+                  <tr>
+                    <td class="id">#{{ o.id }}</td>
+                    <td>{{ o.categoria }}</td>
+                    <td>{{ rotulo(o.tipo) }}</td>
+                    <td class="numero">{{ o.valor !== null ? (o.valor | currency) : '—' }}</td>
+                    <td><app-badge-risco [valor]="o.risco"></app-badge-risco></td>
+                    <td>{{ o.data ? (o.data | date: 'dd/MM/yyyy') : '—' }}</td>
+                    <td [title]="'Status na origem: ' + rotulo(o.status)">{{ situacao(o.status) }}</td>
+                    <td>{{ rotulo(o.resultado) }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        } @else {
+          <app-estado-lista [vazio]="true" mensagemVazio="Nenhuma ocorrência registrada para este cliente."></app-estado-lista>
+        }
+      }
+      @case ('transacoes') {
+        @if (h.transacoes?.length) {
+          <div class="tabela-rolagem">
+            <table class="tabela">
+              <thead>
+                <tr>
+                  <th scope="col">ID</th>
+                  <th scope="col">Data/hora</th>
+                  <th scope="col">Tipo</th>
+                  <th scope="col">Canal</th>
+                  <th scope="col">Contraparte</th>
+                  <th scope="col" class="numero">Valor</th>
+                  <th scope="col">Score</th>
+                  <th scope="col">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (t of h.transacoes; track t.idTransacao) {
+                  <tr>
+                    <td class="id">{{ t.idTransacao }}</td>
+                    <td>{{ t.dataHoraTransacao ? (t.dataHoraTransacao | date: 'dd/MM/yyyy HH:mm') : '—' }}</td>
+                    <td>{{ rotulo(t.tipoTransacao) }}</td>
+                    <td>{{ rotulo(t.canal) }}</td>
+                    <td>{{ t.nomeContraparte ?? '—' }}</td>
+                    <td class="numero">{{ t.valor != null ? (t.valor | currency) : '—' }}</td>
+                    <td>{{ t.scoreTransacao ?? '—' }}</td>
+                    <td>{{ rotulo(t.statusTransacao) }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        } @else {
+          <app-estado-lista [vazio]="true" mensagemVazio="Nenhuma transação registrada para este cliente."></app-estado-lista>
+        }
+      }
+      @case ('contas') {
+        @if (h.contas?.length) {
+          <div class="tabela-rolagem">
+            <table class="tabela">
+              <thead>
+                <tr>
+                  <th scope="col">Conta</th>
+                  <th scope="col">Tipo</th>
+                  <th scope="col">Abertura</th>
+                  <th scope="col">Situação</th>
+                  <th scope="col" class="numero">Limite diário</th>
+                  <th scope="col" class="numero">Saldo médio (30d)</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (c of h.contas; track c.idConta) {
+                  <tr>
+                    <td class="id">{{ c.idConta }}</td>
+                    <td>{{ rotulo(c.tipoConta) }}</td>
+                    <td>{{ c.dataAbertura ? (c.dataAbertura | date: 'dd/MM/yyyy') : '—' }}</td>
+                    <td>{{ rotulo(c.statusConta) }}</td>
+                    <td class="numero">{{ c.limiteTransacionalDiario != null ? (c.limiteTransacionalDiario | currency) : '—' }}</td>
+                    <td class="numero">{{ c.saldoMedio30d != null ? (c.saldoMedio30d | currency) : '—' }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        } @else {
+          <app-estado-lista [vazio]="true" mensagemVazio="Nenhuma conta vinculada a este cliente."></app-estado-lista>
+        }
+      }
+    }
+  </section>
+}

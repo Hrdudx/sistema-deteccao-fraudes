@@ -1,0 +1,42 @@
+<main class="pagina-login">
+  <form class="card cartao-login" (ngSubmit)="entrar()" novalidate>
+    <div class="marca">
+      <strong>SGR</strong>
+      <span>Sistema de Gerenciamento de Riscos</span>
+    </div>
+
+    <h1>Entrar</h1>
+    <p class="texto-suave">Acesse com o e-mail e a senha cadastrados.</p>
+
+    @if (erro) {
+      <div class="aviso aviso-erro" role="alert">{{ erro }}</div>
+    }
+
+    <div class="campo">
+      <label for="email">E-mail</label>
+      <input id="email" type="email" name="email" [(ngModel)]="email" autocomplete="username" required autofocus />
+    </div>
+
+    <div class="campo">
+      <label for="senha">Senha</label>
+      <div class="senha">
+        <input
+          id="senha"
+          [type]="mostrarSenha ? 'text' : 'password'"
+          name="senha"
+          [(ngModel)]="senha"
+          autocomplete="current-password"
+          required
+        />
+        <button type="button" class="botao-link" (click)="mostrarSenha = !mostrarSenha" [attr.aria-pressed]="mostrarSenha">
+          {{ mostrarSenha ? 'Ocultar' : 'Mostrar' }}
+        </button>
+      </div>
+    </div>
+
+    <button type="submit" class="botao entrar" [disabled]="enviando">
+      {{ enviando ? 'Entrando...' : 'Entrar' }}
+    </button>
+
+  </form>
+</main>

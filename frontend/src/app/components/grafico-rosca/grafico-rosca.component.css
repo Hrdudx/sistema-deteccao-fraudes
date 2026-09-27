@@ -1,0 +1,90 @@
+.grafico {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.rosca {
+  width: 148px;
+  height: 148px;
+  flex-shrink: 0;
+}
+
+.trilha {
+  fill: none;
+  stroke: var(--cor-borda-suave);
+  stroke-width: 22;
+}
+
+.fatia {
+  fill: none;
+  stroke-width: 22;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.apagada {
+  opacity: 0.35;
+}
+
+.centro-valor {
+  font-size: 22px;
+  font-weight: 700;
+  fill: var(--cor-texto);
+}
+
+.centro-rotulo {
+  font-size: 9px;
+  fill: var(--cor-texto-fraco);
+}
+
+.legenda {
+  flex: 1;
+  min-width: 160px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.legenda li {
+  display: grid;
+  grid-template-columns: 10px 1fr auto;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 6px;
+  border-radius: 6px;
+  font-size: 0.86rem;
+  cursor: default;
+  transition: opacity 0.15s ease;
+}
+
+.legenda li:hover,
+.legenda li:focus-visible {
+  background: var(--cor-neutro-fundo);
+}
+
+.marcador {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.nome {
+  color: var(--cor-texto);
+}
+
+.valor {
+  color: var(--cor-texto);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.valor small {
+  color: var(--cor-texto-fraco);
+}

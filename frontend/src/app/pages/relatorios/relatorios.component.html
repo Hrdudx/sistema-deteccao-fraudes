@@ -1,0 +1,189 @@
+<app-cabecalho-pagina contexto="Gestão" titulo="Relatórios" subtitulo="Indicadores e relatórios gerenciais de riscos">
+  <div class="campo">
+    <label for="periodo-relatorio" class="sr-only">Período</label>
+    <select id="periodo-relatorio" [(ngModel)]="periodo" (ngModelChange)="montar()" [disabled]="carregando">
+      @for (p of periodos; track p[0]) {
+        <option [value]="p[0]">{{ p[1] }}</option>
+      }
+    </select>
+  </div>
+  <button type="button" class="botao botao-secundario" (click)="imprimir()" [disabled]="carregando">Imprimir</button>
+  <button type="button" class="botao" (click)="exportarCsv()" [disabled]="carregando">Exportar CSV</button>
+</app-cabecalho-pagina>
+
+@if (demonstracao && !carregando) {
+  <div class="aviso" role="status">
+    <span>Backend indisponível — relatório gerado com <strong>dados de demonstração</strong>.</span>
+  </div>
+}
+
+<app-estado-lista [carregando]="carregando" [erro]="erro" mensagemCarregando="Gerando relatórios..." (tentarNovamente)="carregar()"></app-estado-lista>
+
+@if (!carregando && !erro) {
+  <p class="texto-fraco periodo-gerado">Período: <strong>{{ rotuloPeriodo }}</strong> · gerado em {{ geradoEm | date: 'dd/MM/yyyy HH:mm' }}</p>
+
+  <section class="card" aria-labelledby="rel-tipo">
+    <h2 id="rel-tipo">Resumo por tipo de ocorrência</h2>
+    <div class="tabela-rolagem">
+      <table class="tabela">
+        <thead>
+          <tr>
+            <th scope="col">Tipo</th>
+            <th scope="col" class="numero">Registradas</th>
+            <th scope="col" class="numero">Pendentes</th>
+            <th scope="col" class="numero">Em tratativa</th>
+            <th scope="col" class="numero">Concluídas</th>
+            <th scope="col" class="numero">Risco alto/crítico</th>
+            <th scope="col" class="numero">Valor envolvido</th>
+            <th scope="col" class="numero">Tempo médio de conclusão</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (l of porTipo; track l.tipo) {
+            <tr>
+              <td class="id"><a [routerLink]="'/ocorrencias/' + l.tipo.toLowerCase()">{{ l.tipo }}</a></td>
+              <td class="numero">{{ l.registradas | number }}</td>
+              <td class="numero">{{ l.pendentes | number }}</td>
+              <td class="numero">{{ l.emTratativa | number }}</td>
+              <td class="numero">{{ l.concluidas | number }} <small class="texto-fraco">({{ percentual(l.concluidas, l.registradas) }}%)</small></td>
+              <td class="numero">{{ l.altoCritico | number }}</td>
+              <td class="numero">{{ l.valor | currency }}</td>
+              <td class="numero">{{ l.tempoMedioDias !== null ? (l.tempoMedioDias | number: '1.1-1') + ' dias' : '—' }}</td>
+            </tr>
+          }
+        </tbody>
+        <tfoot>
+          <tr>
+            <th scope="row">Total</th>
+            <td class="numero">{{ totais.registradas | number }}</td>
+            <td class="numero">{{ totais.pendentes | number }}</td>
+            <td class="numero">{{ totais.emTratativa | number }}</td>
+            <td class="numero">{{ totais.concluidas | number }} <small class="texto-fraco">({{ percentual(totais.concluidas, totais.registradas) }}%)</small></td>
+            <td class="numero">{{ totais.altoCritico | number }}</td>
+            <td class="numero">{{ totais.valor | currency }}</td>
+            <td class="numero">{{ totais.tempoMedioDias !== null ? (totais.tempoMedioDias | number: '1.1-1') + ' dias' : '—' }}</td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </section>
+
+  <div class="duas-colunas">
+    <section class="card" aria-labelledby="rel-resultado">
+      <h2 id="rel-resultado">Resultado das análises concluídas</h2>
+      @if (resultados.length) {
+        <div class="tabela-rolagem">
+          <table class="tabela">
+            <thead>
+              <tr>
+                <th scope="col">Tipo</th>
+                <th scope="col">Resultado</th>
+                <th scope="col" class="numero">Quantidade</th>
+                <th scope="col">Participação</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (r of resultados; track r.tipo + r.resultado) {
+                <tr>
+                  <td>{{ r.tipo }}</td>
+                  <td>{{ r.resultado }}</td>
+                  <td class="numero">{{ r.quantidade }}</td>
+                  <td>
+                    <span class="barra"><span class="trilha" aria-hidden="true"><span [style.width.%]="r.percentual"></span></span>{{ r.percentual }}%</span>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      } @else {
+        <app-estado-lista [vazio]="true" mensagemVazio="Nenhuma análise concluída no período."></app-estado-lista>
+      }
+    </section>
+
+    <section class="card" aria-labelledby="rel-analista">
+      <h2 id="rel-analista">Ocorrências por responsável</h2>
+      @if (analistas.length) {
+        <div class="tabela-rolagem">
+          <table class="tabela">
+            <thead>
+              <tr>
+                <th scope="col">Responsável</th>
+                <th scope="col" class="numero">Em tratativa</th>
+                <th scope="col" class="numero">Concluídas</th>
+                <th scope="col" class="numero">Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (a of analistas; track a.analista) {
+                <tr>
+                  <td>{{ a.analista }}</td>
+                  <td class="numero">{{ a.emTratativa }}</td>
+                  <td class="numero">{{ a.concluidas }}</td>
+                  <td class="numero">{{ a.total }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      } @else {
+        <app-estado-lista [vazio]="true" mensagemVazio="Nenhuma ocorrência com responsável no período."></app-estado-lista>
+      }
+    </section>
+  </div>
+
+  <div class="duas-colunas">
+    <section class="card" aria-labelledby="rel-clientes">
+      <h2 id="rel-clientes">Clientes com mais ocorrências</h2>
+      @if (clientes.length) {
+        <div class="tabela-rolagem">
+          <table class="tabela">
+            <thead>
+              <tr>
+                <th scope="col">Cliente</th>
+                <th scope="col" class="numero">Ocorrências</th>
+                <th scope="col" class="numero">Alto/crítico</th>
+                <th scope="col" class="numero">Valor envolvido</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (c of clientes; track c.cliente) {
+                <tr>
+                  <td>
+                    @if (c.clienteId) {
+                      <a [routerLink]="['/clientes', c.clienteId]">{{ c.cliente }}</a>
+                    } @else {
+                      {{ c.cliente }}
+                    }
+                  </td>
+                  <td class="numero">{{ c.ocorrencias }}</td>
+                  <td class="numero">{{ c.altoCritico }}</td>
+                  <td class="numero">{{ c.valor | currency }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      } @else {
+        <app-estado-lista [vazio]="true" mensagemVazio="Nenhuma ocorrência no período."></app-estado-lista>
+      }
+    </section>
+
+    <section class="card" aria-labelledby="rel-mov">
+      <h2 id="rel-mov">Movimentações no período</h2>
+      <dl class="grade-dados">
+        <div><dt>Transações</dt><dd>{{ movimentacoes.total | number }}</dd></div>
+        <div><dt>Volume movimentado</dt><dd>{{ movimentacoes.volume | currency }}</dd></div>
+        <div>
+          <dt>Com sinal de risco</dt>
+          <dd>{{ movimentacoes.suspeitas | number }} <small class="texto-fraco">({{ percentual(movimentacoes.suspeitas, movimentacoes.total) }}%)</small></dd>
+        </div>
+        <div><dt>Em análise</dt><dd>{{ movimentacoes.emAnalise | number }}</dd></div>
+        <div><dt>Negadas</dt><dd>{{ movimentacoes.negadas | number }}</dd></div>
+      </dl>
+      <div class="acoes">
+        <a class="botao botao-secundario" routerLink="/ocorrencias/transacional">Ver transações com sinal de risco</a>
+      </div>
+    </section>
+  </div>
+}

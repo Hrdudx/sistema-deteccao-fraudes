@@ -1,18 +1,83 @@
 import { Routes } from '@angular/router';
 import { HomeComponent } from './pages/home/home.component';
+import { administradorGuard, autenticadoGuard } from './services/auth.guard';
 
 // Menu conforme o DMS (seção 9.1): Home, Clientes, Ocorrências, Relatórios, Usuários.
 // Categorias de Ocorrência: somente PLD, Chargeback, KYC e Fraude.
-// Rotas fora de Home ainda são placeholders — cada uma pertence a quem for
-// responsável pela área (Eduarda: Clientes; Airon/Gabriella: Ocorrências).
+// As telas além da Home são carregadas sob demanda (lazy loading) para deixar a
+// abertura do sistema mais rápida. O "title" de cada rota aparece na aba do navegador.
+const ocorrencias = () => import('./pages/ocorrencias/ocorrencias.component').then((m) => m.OcorrenciasComponent);
+
 export const routes: Routes = [
+  {
+    path: 'login',
+    loadComponent: () => import('./pages/login/login.component').then((m) => m.LoginComponent),
+    title: 'Entrar · SGR',
+  },
+  // Todas as demais telas exigem login (UC01). A tela de Usuários também exige o
+  // perfil Administrador (RF04 / TEL13).
+  {
+    path: '',
+    canActivateChild: [autenticadoGuard],
+    children: [
   { path: '', redirectTo: 'home', pathMatch: 'full' },
-  { path: 'home', component: HomeComponent },
-  // { path: 'clientes', component: ClientesComponent },
-  // { path: 'ocorrencias/pld', component: PldComponent },
-  // { path: 'ocorrencias/chargeback', component: ChargebackComponent },
-  // { path: 'ocorrencias/kyc', component: KycComponent },
-  // { path: 'ocorrencias/fraude', component: FraudeComponent },
-  // { path: 'relatorios', component: RelatoriosComponent },
-  // { path: 'usuarios', component: UsuariosComponent },
+  { path: 'home', component: HomeComponent, title: 'Home · SGR' },
+  {
+    path: 'clientes',
+    loadComponent: () => import('./pages/clientes/clientes.component').then((m) => m.ClientesComponent),
+    title: 'Clientes · SGR',
+  },
+  {
+    path: 'clientes/:id',
+    loadComponent: () =>
+      import('./pages/cliente-detalhe/cliente-detalhe.component').then((m) => m.ClienteDetalheComponent),
+    title: 'Histórico do cliente · SGR',
+  },
+  { path: 'ocorrencias', loadComponent: ocorrencias, title: 'Ocorrências · SGR' },
+  {
+    path: 'ocorrencias/movimentacoes',
+    loadComponent: ocorrencias,
+    data: { visao: 'movimentacoes' },
+    title: 'Movimentações · SGR',
+  },
+  {
+    path: 'ocorrencias/transacional',
+    loadComponent: ocorrencias,
+    data: { visao: 'transacional' },
+    title: 'Transacional · SGR',
+  },
+  { path: 'ocorrencias/pld', loadComponent: ocorrencias, data: { categoria: 'PLD' }, title: 'PLD · SGR' },
+  {
+    path: 'ocorrencias/chargeback',
+    loadComponent: ocorrencias,
+    data: { categoria: 'Chargeback' },
+    title: 'Chargeback · SGR',
+  },
+  { path: 'ocorrencias/kyc', loadComponent: ocorrencias, data: { categoria: 'KYC' }, title: 'KYC · SGR' },
+  // Fraude: a tela com filtros avançados de alertas é da Gabriella. Quando ela for
+  // integrada, basta trocar o loadComponent abaixo pelo componente dela.
+  { path: 'ocorrencias/fraude', loadComponent: ocorrencias, data: { categoria: 'Fraude' }, title: 'Fraude · SGR' },
+  {
+    path: 'relatorios',
+    loadComponent: () => import('./pages/relatorios/relatorios.component').then((m) => m.RelatoriosComponent),
+    title: 'Relatórios · SGR',
+  },
+  {
+    path: 'usuarios',
+    loadComponent: () => import('./pages/usuarios/usuarios.component').then((m) => m.UsuariosComponent),
+    canActivate: [administradorGuard],
+    title: 'Usuários · SGR',
+  },
+  {
+    path: 'acesso-negado',
+    loadComponent: () => import('./pages/acesso-negado/acesso-negado.component').then((m) => m.AcessoNegadoComponent),
+    title: 'Acesso restrito · SGR',
+  },
+  {
+    path: '**',
+    loadComponent: () => import('./pages/nao-encontrada/nao-encontrada.component').then((m) => m.NaoEncontradaComponent),
+    title: 'Página não encontrada · SGR',
+  },
+    ],
+  },
 ];

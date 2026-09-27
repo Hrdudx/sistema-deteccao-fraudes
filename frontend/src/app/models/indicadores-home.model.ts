@@ -1,29 +1,46 @@
-// Formato esperado do endpoint que o backend (HomeService, conforme o DMS) deve expor.
-// Combine este contrato com o Diogo antes de implementar — é só uma proposta inicial.
+// Contrato da Home (TEL02 do DRE). Formato proposto para o endpoint
+// GET /api/home/indicadores?periodo=... do backend (HomeService, conforme o DMS).
+// Enquanto o endpoint agregado não existir, o frontend monta este objeto a partir
+// das listas de ocorrências e clientes da API (ver HomeService).
 
-export interface IndicadoresHome {
-  ocorrenciasAbertas: number;
-  ocorrenciasCriticas: number;
-  ocorrenciasAltas: number;
-  tratativasConcluidasHoje: number;
-  slaPercentualDentroPrazo: number;
-  slaVencidas: number;
-  ocorrenciasPorTipo: {
-    PLD: number;
-    Chargeback: number;
-    KYC: number;
-    Fraude: number;
-  };
-  // Bloco principal, conforme a seção 9.2 do DMS ("Resumo do mês" é o bloco principal)
-  resumoDoMes: ResumoOcorrencia[];
-  // Bloco secundário, posicionado abaixo do resumo do mês
-  resumoDoDia: ResumoOcorrencia[];
+import { CategoriaOcorrencia } from './ocorrencia.model';
+
+export type PeriodoHome = 'mes' | '30' | '90' | 'todos';
+
+export interface ContagemSla {
+  dentroPrazo: number;
+  atencao: number;
+  vencidas: number;
 }
 
-export interface ResumoOcorrencia {
-  prioridade: 'Alta' | 'Media' | 'Baixa';
-  ocorrencia: string;
-  cliente: string;
-  valor: number;
-  slaRestante: string;
+export interface SlaPorTipo extends ContagemSla {
+  tipo: CategoriaOcorrencia;
+  total: number;
+}
+
+export interface IndicadoresHome {
+  // Cards do topo
+  clientesCadastrados: number | null;
+  ocorrenciasAbertas: number;
+  tratativasEmAndamento: number;
+  tratativasConcluidasPeriodo: number;
+  riscosIdentificadosPeriodo: number;
+
+  // Gráficos (ocorrências registradas no período)
+  ocorrenciasPorTipo: Record<CategoriaOcorrencia, number>;
+  ocorrenciasPorStatus: { pendente: number; emTratativa: number; concluida: number };
+  ocorrenciasPorPrioridade: { critica: number; alta: number; media: number; baixa: number; semClassificacao: number };
+
+  // SLA (RF10/RF11). null = a base ainda não informa prazos de SLA.
+  sla: ContagemSla | null;
+  slaPorTipo: SlaPorTipo[] | null;
+
+  // Resumo do dia (RF13) — null quando a informação não existe na base
+  resumoDoDia: {
+    novasOcorrencias: number;
+    tratativasIniciadas: number | null;
+    tratativasConcluidas: number;
+    slaVencendoHoje: number | null;
+    slaVencidos: number | null;
+  };
 }

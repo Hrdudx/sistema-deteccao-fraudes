@@ -1,0 +1,48 @@
+.explicacao {
+  margin: 0 0 12px;
+  font-size: 0.88rem;
+}
+
+.filtros-transacoes {
+  grid-template-columns: 2fr repeat(3, 1fr) auto;
+}
+
+.sem-quebra {
+  white-space: nowrap;
+}
+
+.sinais {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  min-width: 200px;
+}
+
+.sem-margem {
+  margin: 2px 0 0;
+}
+
+.sinais-detalhe {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 16px;
+  font-size: 0.88rem;
+}
+
+.acoes {
+  margin-top: 16px;
+}
+
+@media (max-width: 1000px) {
+  .filtros-transacoes {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .filtros-transacoes {
+    grid-template-columns: 1fr;
+  }
+}

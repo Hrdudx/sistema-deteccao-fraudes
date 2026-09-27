@@ -3,8 +3,139 @@
   min-height: 100vh;
 }
 
-.conteudo {
+.principal {
   flex: 1;
-  padding: 24px;
-  background: #f8fafc;
+  min-width: 0;
+}
+
+.barra-superior {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  height: 60px;
+  padding: 0 24px;
+  background: var(--cor-superficie);
+  border-bottom: 1px solid var(--cor-borda);
+}
+
+.botao-menu,
+.botao-usuario {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 8px;
+  border: none;
+  border-radius: 8px;
+  background: none;
+  color: var(--cor-texto);
+  font: inherit;
+  cursor: pointer;
+}
+
+.botao-menu:hover,
+.botao-usuario:hover {
+  background: var(--cor-neutro-fundo);
+}
+
+.nome-perfil {
+  font-weight: 600;
+}
+
+.usuario {
+  position: relative;
+}
+
+.menu-usuario {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  min-width: 220px;
+  padding: 6px;
+  background: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+}
+
+.dados-usuario {
+  display: flex;
+  flex-direction: column;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--cor-borda-suave);
+  margin-bottom: 4px;
+  font-size: 0.85rem;
+}
+
+.dados-usuario span {
+  color: var(--cor-texto-fraco);
+}
+
+.menu-usuario button,
+.menu-usuario a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 10px;
+  border: none;
+  border-radius: 6px;
+  background: none;
+  color: var(--cor-texto);
+  font: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.menu-usuario button:hover,
+.menu-usuario a:hover {
+  background: var(--cor-neutro-fundo);
+}
+
+.conteudo {
+  padding: 28px 28px 20px;
+  max-width: 1440px;
+  margin: 0 auto;
+}
+
+.conteudo:focus {
+  outline: none;
+}
+
+.fundo-menu {
+  display: none;
+}
+
+.pular-conteudo {
+  position: absolute;
+  left: 8px;
+  top: -48px;
+  z-index: 30;
+  padding: 8px 12px;
+  background: #ffffff;
+  border-radius: 6px;
+}
+
+.pular-conteudo:focus {
+  top: 8px;
+}
+
+@media (max-width: 900px) {
+  .barra-superior {
+    padding: 0 12px;
+  }
+
+  .fundo-menu {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 15;
+    background: rgba(15, 23, 42, 0.45);
+  }
+
+  .conteudo {
+    padding: 20px 16px;
+  }
 }
