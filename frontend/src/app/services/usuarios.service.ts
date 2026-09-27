@@ -80,6 +80,8 @@ export function mensagemDeErro(erro: HttpErrorResponse): string {
 
 // Equipe do projeto (e-mails definidos pela equipe para a demonstração).
 export const USUARIOS_DEMONSTRACAO: UsuarioSistema[] = [
+  // Conta administrativa para a apresentação: login "adm", senha 123
+  { id: 99, nome: 'Administrador do Sistema', email: 'adm', perfil: 'ADMINISTRADOR', status: 'ATIVO' },
   { id: 1, nome: 'Airon Francelino Valerio', email: 'airon.economia@gmail.com', perfil: 'GESTOR', status: 'ATIVO' },
   { id: 2, nome: 'Diogo Pereira da Silva', email: 'diigopereira.15@gmail.com', perfil: 'ADMINISTRADOR', status: 'ATIVO' },
   { id: 3, nome: 'Eduarda Gabriela Rosa Protazio', email: 'erosa8614@gmail.com', perfil: 'ANALISTA_RISCOS', status: 'ATIVO' },

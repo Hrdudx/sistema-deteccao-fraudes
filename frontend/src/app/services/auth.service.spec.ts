@@ -56,6 +56,13 @@ describe('AuthService (UC01 — Realizar Login)', () => {
     expect(auth.usuario()?.nome).toBe('Hayyra Eduarda Rocha Honorio');
   });
 
+  it('usuário "adm" entra como Administrador', () => {
+    auth.entrar('adm', SENHA_DEMONSTRACAO).subscribe();
+    backendFora();
+    expect(auth.usuario()?.nome).toBe('Administrador do Sistema');
+    expect(auth.administrador()).toBeTrue();
+  });
+
   it('sair encerra a sessão', () => {
     auth.entrar('hayyraroc@gmail.com', SENHA_DEMONSTRACAO).subscribe();
     backendFora();

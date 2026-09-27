@@ -77,12 +77,14 @@ npm run demo
 ```
 
 Abre o navegador sozinho, usa só os dados de demonstração e não mostra erros de
-conexão no terminal. Entre com um usuário da equipe (senha `123`):
+conexão no terminal. Entre com um dos usuários abaixo (senha `123`). Só o perfil
+Administrador acessa a tela **Usuários**:
 
 | Usuário | Perfil |
 |---------|--------|
+| `adm` | Administrador |
 | `airon.economia@gmail.com` | Gestor |
-| `diigopereira.15@gmail.com` | Administrador (único que acessa **Usuários**) |
+| `diigopereira.15@gmail.com` | Administrador |
 | `erosa8614@gmail.com` | Analista de Riscos |
 | `GabriellaCotrim@gmail.com` | Analista de Compliance |
 | `hayyraroc@gmail.com` | Analista de Riscos |
