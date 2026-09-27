@@ -1,7 +1,12 @@
 package br.ueg.trindade.sistemariscos_fullstack.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PastOrPresent;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.PositiveOrZero;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
@@ -13,55 +18,67 @@ public class Cliente {
     @Column(name = "id_cliente", nullable = false)
     private String idCliente;
 
-    @NotNull
+    @NotBlank(message = "O tipo de pessoa é obrigatório")
+    @Pattern(
+        regexp = "PF|PJ",
+        message = "O tipo de pessoa deve ser PF ou PJ"
+    )
     @Column(name = "tipo_pessoa", nullable = false)
     private String tipoPessoa;
 
-    @NotNull
+    @NotBlank(message = "O nome ou razão social é obrigatório")
     @Column(name = "nome_razao_social", nullable = false)
     private String nomeRazaoSocial;
 
-    @NotNull
+    @NotBlank(message = "O documento é obrigatório")
     @Column(name = "documento_ficticio", nullable = false)
     private String documentoFicticio;
 
-    @NotNull
+    @NotNull(message = "A data de nascimento ou abertura é obrigatória")
+    @PastOrPresent(message = "A data de nascimento ou abertura não pode estar no futuro")
     @Column(name = "data_nascimento_abertura", nullable = false)
     private LocalDate dataNascimentoAbertura;
 
-    @NotNull
+    @NotBlank(message = "A cidade é obrigatória")
     @Column(name = "cidade", nullable = false)
     private String cidade;
 
-    @NotNull
+    @NotBlank(message = "A UF é obrigatória")
+    @Pattern(
+        regexp = "[A-Z]{2}",
+        message = "A UF deve possuir duas letras maiúsculas"
+    )
     @Column(name = "uf", nullable = false)
     private String uf;
 
-    @NotNull
+    @NotNull(message = "A data de cadastro é obrigatória")
+    @PastOrPresent(message = "A data de cadastro não pode estar no futuro")
     @Column(name = "data_cadastro", nullable = false)
     private LocalDate dataCadastro;
 
-    @NotNull
+    @NotBlank(message = "O status do cliente é obrigatório")
     @Column(name = "status_cliente", nullable = false)
     private String statusCliente;
 
-    @NotNull
+    @NotBlank(message = "O segmento é obrigatório")
     @Column(name = "segmento", nullable = false)
     private String segmento;
 
-    @NotNull
+    @NotNull(message = "A renda ou faturamento mensal é obrigatório")
+    @PositiveOrZero(message = "A renda ou faturamento não pode ser negativo")
     @Column(name = "renda_faturamento_mensal", nullable = false)
     private BigDecimal rendaFaturamentoMensal;
 
-    @NotNull
+    @NotBlank(message = "A profissão ou atividade é obrigatória")
     @Column(name = "profissao_atividade", nullable = false)
     private String profissaoAtividade;
 
-    @NotNull
+    @NotBlank(message = "A origem do cadastro é obrigatória")
     @Column(name = "origem_cadastro", nullable = false)
     private String origemCadastro;
 
-    public Cliente() {}
+    public Cliente() {
+    }
 
     public String getIdCliente() {
         return idCliente;
@@ -166,5 +183,4 @@ public class Cliente {
     public void setOrigemCadastro(String origemCadastro) {
         this.origemCadastro = origemCadastro;
     }
-
 }

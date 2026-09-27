@@ -4,6 +4,7 @@ import br.ueg.trindade.sistemariscos_fullstack.dto.ClienteHistoricoDTO;
 import br.ueg.trindade.sistemariscos_fullstack.exception.RecursoNaoEncontradoException;
 import br.ueg.trindade.sistemariscos_fullstack.model.*;
 import br.ueg.trindade.sistemariscos_fullstack.repository.*;
+import br.ueg.trindade.sistemariscos_fullstack.exception.ClienteDuplicadoException;
 
 import org.springframework.stereotype.Service;
 
@@ -55,9 +56,16 @@ public class ClienteService {
     }
 
     public Cliente salvar(Cliente objeto) {
-        return clienteRepository.save(objeto);
+
+    if (clienteRepository.existsById(objeto.getIdCliente())) {
+        throw new ClienteDuplicadoException(
+                "Já existe um cliente cadastrado com o ID: "
+                        + objeto.getIdCliente()
+        );
     }
 
+    return clienteRepository.save(objeto);
+}
     public Cliente atualizar(String id, Cliente objeto) {
         buscarPorId(id);
         objeto.setIdCliente(id);
