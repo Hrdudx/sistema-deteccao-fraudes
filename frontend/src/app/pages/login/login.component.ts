@@ -2,8 +2,7 @@ import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
-import { AuthService, SENHA_DEMONSTRACAO } from '../../services/auth.service';
-import { PERFIS_USUARIO, USUARIOS_DEMONSTRACAO } from '../../services/usuarios.service';
+import { AuthService } from '../../services/auth.service';
 
 // Tela de acesso ao SGR, integrada ao POST /api/auth/login (US01).
 @Component({
@@ -19,13 +18,6 @@ export class LoginComponent {
   mostrarSenha = false;
   enviando = false;
   erro: string | null = null;
-
-  // Contas para a demonstração (usadas quando o backend não está rodando)
-  readonly senhaDemonstracao = SENHA_DEMONSTRACAO;
-  readonly contasDemonstracao = USUARIOS_DEMONSTRACAO.filter((u) => u.status === 'ATIVO').map((u) => ({
-    ...u,
-    rotuloPerfil: PERFIS_USUARIO.find((p) => p.valor === u.perfil)?.rotulo ?? u.perfil,
-  }));
 
   constructor(
     private auth: AuthService,
@@ -51,12 +43,6 @@ export class LoginComponent {
         this.erro = this.mensagemErro(erro);
       },
     });
-  }
-
-  preencher(email: string): void {
-    this.email = email;
-    this.senha = SENHA_DEMONSTRACAO;
-    this.erro = null;
   }
 
   // Fluxos alternativos do UC01: A1 credenciais inválidas (401), A2 usuário inativo (403).
