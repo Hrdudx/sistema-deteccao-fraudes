@@ -36,7 +36,7 @@ describe('AuthService (UC01 — Realizar Login)', () => {
   });
 
   it('com o backend fora do ar, entra com um usuário da equipe', () => {
-    auth.entrar('diogo.pereira@sgr', SENHA_DEMONSTRACAO).subscribe();
+    auth.entrar('diigopereira.15@gmail.com', SENHA_DEMONSTRACAO).subscribe();
     backendFora();
     expect(auth.usuario()?.nome).toBe('Diogo Pereira da Silva');
     expect(auth.administrador()).toBeTrue();
@@ -44,20 +44,20 @@ describe('AuthService (UC01 — Realizar Login)', () => {
 
   it('com o backend fora do ar, recusa senha errada', () => {
     let status = 0;
-    auth.entrar('diogo.pereira@sgr', 'errada').subscribe({ error: (e) => (status = e.status) });
+    auth.entrar('diigopereira.15@gmail.com', 'errada').subscribe({ error: (e) => (status = e.status) });
     backendFora();
     expect(status).toBe(401);
     expect(auth.autenticado()).toBeFalse();
   });
 
   it('conta da equipe entra na demonstração mesmo se outro backend responder 401', () => {
-    auth.entrar('hayyra.rocha@sgr', SENHA_DEMONSTRACAO).subscribe();
+    auth.entrar('hayyraroc@gmail.com', SENHA_DEMONSTRACAO).subscribe();
     http.expectOne('/api/auth/login').flush('Unauthorized', { status: 401, statusText: 'Unauthorized' });
     expect(auth.usuario()?.nome).toBe('Hayyra Eduarda Rocha Honorio');
   });
 
   it('sair encerra a sessão', () => {
-    auth.entrar('hayyra.rocha@sgr', SENHA_DEMONSTRACAO).subscribe();
+    auth.entrar('hayyraroc@gmail.com', SENHA_DEMONSTRACAO).subscribe();
     backendFora();
     auth.sair();
     expect(auth.autenticado()).toBeFalse();

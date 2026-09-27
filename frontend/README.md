@@ -77,15 +77,15 @@ npm run demo
 ```
 
 Abre o navegador sozinho, usa só os dados de demonstração e não mostra erros de
-conexão no terminal. Entre com um usuário da equipe (senha `sgr123`):
+conexão no terminal. Entre com um usuário da equipe (senha `123`):
 
 | Usuário | Perfil |
 |---------|--------|
-| `airon.francelino@sgr` | Gestor |
-| `diogo.pereira@sgr` | Administrador (único que acessa **Usuários**) |
-| `eduarda.rosa@sgr` | Analista de Riscos |
-| `gabriella.cotrim@sgr` | Analista de Compliance |
-| `hayyra.rocha@sgr` | Analista de Riscos |
+| `airon.economia@gmail.com` | Gestor |
+| `diigopereira.15@gmail.com` | Administrador (único que acessa **Usuários**) |
+| `erosa8614@gmail.com` | Analista de Riscos |
+| `GabriellaCotrim@gmail.com` | Analista de Compliance |
+| `hayyraroc@gmail.com` | Analista de Riscos |
 
 Com o backend rodando (`npm start`), o login usa o `POST /api/auth/login` de verdade.
 

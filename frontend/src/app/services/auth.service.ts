@@ -15,7 +15,7 @@ export interface UsuarioLogado {
 const CHAVE_SESSAO = 'sgr.usuario';
 
 // Senha única dos usuários de demonstração (usada só quando o backend não responde).
-export const SENHA_DEMONSTRACAO = 'sgr123';
+export const SENHA_DEMONSTRACAO = '123';
 
 // UC01 — Realizar Login. Autentica pelo POST /api/auth/login (US01).
 // Se o backend estiver fora do ar, permite entrar com os usuários de
@@ -33,7 +33,7 @@ export class AuthService {
     return this.http.post<UsuarioLogado>(`${environment.apiUrl}/auth/login`, { email, senha }).pipe(
       catchError((erro: HttpErrorResponse) =>
         // Status 0 = sem conexão; 5xx = backend fora do ar (o proxy do ng serve responde 500).
-        // Contas da equipe (@sgr) só existem na demonstração: se o backend não as
+        // Contas da equipe só existem na demonstração: se o backend não as
         // conhece (ou outro serviço responde na porta 8080), entra em modo demonstração.
         erro.status === 0 || erro.status >= 500 || this.contaDemonstracao(email)
           ? this.entrarDemonstracao(email, senha)

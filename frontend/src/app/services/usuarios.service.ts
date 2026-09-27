@@ -78,11 +78,11 @@ export function mensagemDeErro(erro: HttpErrorResponse): string {
   return 'Não foi possível concluir a operação. Tente novamente.';
 }
 
-// Equipe do projeto (e-mails fictícios do sistema — o repositório é público).
+// Equipe do projeto (e-mails definidos pela equipe para a demonstração).
 export const USUARIOS_DEMONSTRACAO: UsuarioSistema[] = [
-  { id: 1, nome: 'Airon Francelino Valerio', email: 'airon.francelino@sgr', perfil: 'GESTOR', status: 'ATIVO' },
-  { id: 2, nome: 'Diogo Pereira da Silva', email: 'diogo.pereira@sgr', perfil: 'ADMINISTRADOR', status: 'ATIVO' },
-  { id: 3, nome: 'Eduarda Gabriela Rosa Protazio', email: 'eduarda.rosa@sgr', perfil: 'ANALISTA_RISCOS', status: 'ATIVO' },
-  { id: 4, nome: 'Gabriella Cotrim Viana da Silva', email: 'gabriella.cotrim@sgr', perfil: 'ANALISTA_COMPLIANCE', status: 'ATIVO' },
-  { id: 5, nome: 'Hayyra Eduarda Rocha Honorio', email: 'hayyra.rocha@sgr', perfil: 'ANALISTA_RISCOS', status: 'ATIVO' },
+  { id: 1, nome: 'Airon Francelino Valerio', email: 'airon.economia@gmail.com', perfil: 'GESTOR', status: 'ATIVO' },
+  { id: 2, nome: 'Diogo Pereira da Silva', email: 'diigopereira.15@gmail.com', perfil: 'ADMINISTRADOR', status: 'ATIVO' },
+  { id: 3, nome: 'Eduarda Gabriela Rosa Protazio', email: 'erosa8614@gmail.com', perfil: 'ANALISTA_RISCOS', status: 'ATIVO' },
+  { id: 4, nome: 'Gabriella Cotrim Viana da Silva', email: 'GabriellaCotrim@gmail.com', perfil: 'ANALISTA_COMPLIANCE', status: 'ATIVO' },
+  { id: 5, nome: 'Hayyra Eduarda Rocha Honorio', email: 'hayyraroc@gmail.com', perfil: 'ANALISTA_RISCOS', status: 'ATIVO' },
 ];
