@@ -1,6 +1,6 @@
-# SGR — Frontend (Sistema de Gerenciamento de Riscos)
+# Sistema de Detecção de Fraudes — Frontend
 
-Frontend em **Angular** do Sistema de Gerenciamento de Riscos (SGR), desenvolvido para a disciplina de Práticas Interdisciplinares — UEG.
+Frontend em **Angular** do Sistema de Detecção de Fraudes, desenvolvido para a disciplina de Práticas Interdisciplinares — UEG.
 
 ## Stack
 
@@ -82,7 +82,7 @@ Administrador acessa a tela **Usuários**:
 
 | Usuário | Perfil |
 |---------|--------|
-| `adm` | Administrador |
+| `adm@sgr.com` | Administrador |
 | `airon.economia@gmail.com` | Gestor |
 | `diigopereira.15@gmail.com` | Administrador |
 | `erosa8614@gmail.com` | Analista de Riscos |
@@ -166,4 +166,4 @@ A URL base da API é configurada em `src/environments/environment.ts` (`apiUrl`)
 
 ## Equipe
 
-Desenvolvido por Hayyra Eduarda Rocha Honorio (Home, navegação e componentes visuais) como parte do Sistema de Gerenciamento de Riscos, em conjunto com Airon Francelino, Eduarda Gabriela Rosa Protazio, Gabriella Cotrim Viana da Silva e Diogo Pereira da Silva.
+Desenvolvido por Hayyra Eduarda Rocha Honorio (Home, navegação e componentes visuais) como parte do Sistema de Detecção de Fraudes, em conjunto com Airon Francelino, Eduarda Gabriela Rosa Protazio, Gabriella Cotrim Viana da Silva e Diogo Pereira da Silva.

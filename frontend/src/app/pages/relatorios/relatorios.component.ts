@@ -220,7 +220,7 @@ export class RelatoriosComponent implements OnInit {
   exportarCsv(): void {
     const moeda = (v: number) => v.toFixed(2).replace('.', ',');
     const linhas: (string | number)[][] = [
-      ['Relatório SGR', this.rotuloPeriodo, `Gerado em ${this.geradoEm.toLocaleString('pt-BR')}`],
+      ['Relatório — Sistema de Detecção de Fraudes', this.rotuloPeriodo, `Gerado em ${this.geradoEm.toLocaleString('pt-BR')}`],
       [],
       ['Resumo por tipo de ocorrência'],
       ['Tipo', 'Registradas', 'Pendentes', 'Em tratativa', 'Concluídas', 'Risco alto/crítico', 'Valor envolvido (R$)', 'Tempo médio de conclusão (dias)'],
@@ -257,7 +257,7 @@ export class RelatoriosComponent implements OnInit {
     const url = URL.createObjectURL(new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' }));
     const link = document.createElement('a');
     link.href = url;
-    link.download = `relatorio-sgr-${this.periodo}-${this.geradoEm.toISOString().slice(0, 10)}.csv`;
+    link.download = `relatorio-deteccao-fraudes-${this.periodo}-${this.geradoEm.toISOString().slice(0, 10)}.csv`;
     link.click();
     URL.revokeObjectURL(url);
   }

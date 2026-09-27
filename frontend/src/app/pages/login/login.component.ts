@@ -4,7 +4,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 
-// Tela de acesso ao SGR, integrada ao POST /api/auth/login (US01).
+// Tela de acesso ao Sistema de Detecção de Fraudes, integrada ao POST /api/auth/login (US01).
 @Component({
   selector: 'app-login',
   standalone: true,
@@ -31,7 +31,7 @@ export class LoginComponent {
   entrar(): void {
     this.erro = null;
     if (!this.email.trim() || !this.senha) {
-      this.erro = 'Informe e-mail (ou usuário) e senha para continuar.';
+      this.erro = 'Informe e-mail e senha para continuar.';
       return;
     }
 

@@ -56,8 +56,8 @@ describe('AuthService (UC01 — Realizar Login)', () => {
     expect(auth.usuario()?.nome).toBe('Hayyra Eduarda Rocha Honorio');
   });
 
-  it('usuário "adm" entra como Administrador', () => {
-    auth.entrar('adm', SENHA_DEMONSTRACAO).subscribe();
+  it('adm@sgr.com entra como Administrador', () => {
+    auth.entrar('adm@sgr.com', SENHA_DEMONSTRACAO).subscribe();
     backendFora();
     expect(auth.usuario()?.nome).toBe('Administrador do Sistema');
     expect(auth.administrador()).toBeTrue();
