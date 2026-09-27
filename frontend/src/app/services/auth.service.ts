@@ -32,8 +32,12 @@ export class AuthService {
   entrar(email: string, senha: string): Observable<UsuarioLogado> {
     return this.http.post<UsuarioLogado>(`${environment.apiUrl}/auth/login`, { email, senha }).pipe(
       catchError((erro: HttpErrorResponse) =>
-        // Status 0 = sem conexão; 5xx = backend fora do ar (o proxy do ng serve responde 500)
-        erro.status === 0 || erro.status >= 500 ? this.entrarDemonstracao(email, senha) : throwError(() => erro),
+        // Status 0 = sem conexão; 5xx = backend fora do ar (o proxy do ng serve responde 500).
+        // Contas da equipe (@sgr) só existem na demonstração: se o backend não as
+        // conhece (ou outro serviço responde na porta 8080), entra em modo demonstração.
+        erro.status === 0 || erro.status >= 500 || this.contaDemonstracao(email)
+          ? this.entrarDemonstracao(email, senha)
+          : throwError(() => erro),
       ),
       tap((usuario) => this.salvarSessao(usuario)),
     );
@@ -48,9 +52,13 @@ export class AuthService {
     this.usuario.set(null);
   }
 
+  private contaDemonstracao(email: string): boolean {
+    return USUARIOS_DEMONSTRACAO.some((u) => u.email.toLowerCase() === email.trim().toLowerCase());
+  }
+
   // Mesmas regras do backend: credencial inválida -> 401, usuário inativo -> 403.
   private entrarDemonstracao(email: string, senha: string): Observable<UsuarioLogado> {
-    const usuario = USUARIOS_DEMONSTRACAO.find((u) => u.email.toLowerCase() === email.toLowerCase());
+    const usuario = USUARIOS_DEMONSTRACAO.find((u) => u.email.toLowerCase() === email.trim().toLowerCase());
     if (!usuario || senha !== SENHA_DEMONSTRACAO) {
       return throwError(() => new HttpErrorResponse({ status: 401, error: 'Credenciais inválidas' }));
     }

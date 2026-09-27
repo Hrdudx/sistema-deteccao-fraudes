@@ -27,9 +27,9 @@ describe('AuthService (UC01 — Realizar Login)', () => {
     expect(auth.autenticado()).toBeTrue();
   });
 
-  it('não cai na demonstração quando o backend recusa a senha (401)', () => {
+  it('não cai na demonstração quando o backend recusa um usuário real (401)', () => {
     let status = 0;
-    auth.entrar('hayyra.rocha@sgr', SENHA_DEMONSTRACAO).subscribe({ error: (e) => (status = e.status) });
+    auth.entrar('usuario.real@empresa.com', SENHA_DEMONSTRACAO).subscribe({ error: (e) => (status = e.status) });
     http.expectOne('/api/auth/login').flush('Credenciais inválidas', { status: 401, statusText: 'Unauthorized' });
     expect(status).toBe(401);
     expect(auth.autenticado()).toBeFalse();
@@ -48,6 +48,12 @@ describe('AuthService (UC01 — Realizar Login)', () => {
     backendFora();
     expect(status).toBe(401);
     expect(auth.autenticado()).toBeFalse();
+  });
+
+  it('conta da equipe entra na demonstração mesmo se outro backend responder 401', () => {
+    auth.entrar('hayyra.rocha@sgr', SENHA_DEMONSTRACAO).subscribe();
+    http.expectOne('/api/auth/login').flush('Unauthorized', { status: 401, statusText: 'Unauthorized' });
+    expect(auth.usuario()?.nome).toBe('Hayyra Eduarda Rocha Honorio');
   });
 
   it('sair encerra a sessão', () => {
