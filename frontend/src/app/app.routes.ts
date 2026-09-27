@@ -6,7 +6,6 @@ import { HomeComponent } from './pages/home/home.component';
 // As telas além da Home são carregadas sob demanda (lazy loading) para deixar a
 // abertura do sistema mais rápida. O "title" de cada rota aparece na aba do navegador.
 const ocorrencias = () => import('./pages/ocorrencias/ocorrencias.component').then((m) => m.OcorrenciasComponent);
-const emConstrucao = () => import('./pages/em-construcao/em-construcao.component').then((m) => m.EmConstrucaoComponent);
 
 export const routes: Routes = [
   { path: '', redirectTo: 'home', pathMatch: 'full' },
@@ -53,14 +52,12 @@ export const routes: Routes = [
   { path: 'ocorrencias/fraude', loadComponent: ocorrencias, data: { categoria: 'Fraude' }, title: 'Fraude · SGR' },
   {
     path: 'relatorios',
-    loadComponent: emConstrucao,
-    data: { titulo: 'Relatórios', descricao: 'Indicadores e relatórios gerenciais de riscos' },
+    loadComponent: () => import('./pages/relatorios/relatorios.component').then((m) => m.RelatoriosComponent),
     title: 'Relatórios · SGR',
   },
   {
     path: 'usuarios',
-    loadComponent: emConstrucao,
-    data: { titulo: 'Usuários', descricao: 'Gestão de usuários e perfis de acesso' },
+    loadComponent: () => import('./pages/usuarios/usuarios.component').then((m) => m.UsuariosComponent),
     title: 'Usuários · SGR',
   },
   {

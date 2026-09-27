@@ -1,0 +1,57 @@
+.card h2 {
+  margin-bottom: 12px;
+}
+
+.periodo-gerado {
+  margin: -8px 0 12px;
+}
+
+.duas-colunas {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+tfoot th,
+tfoot td {
+  padding: 10px;
+  border-top: 2px solid var(--cor-borda);
+  font-weight: 700;
+  text-align: left;
+}
+
+tfoot td.numero {
+  text-align: right;
+}
+
+.barra {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 120px;
+  font-size: 0.85rem;
+}
+
+.barra .trilha {
+  flex: 1;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--cor-neutro-fundo);
+  overflow: hidden;
+}
+
+.barra .trilha span {
+  display: block;
+  height: 100%;
+  background: var(--cor-primaria);
+}
+
+.acoes {
+  margin-top: 16px;
+}
+
+@media (max-width: 1000px) {
+  .duas-colunas {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

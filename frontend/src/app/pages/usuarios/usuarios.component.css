@@ -1,0 +1,64 @@
+.card h2 {
+  margin-bottom: 12px;
+}
+
+.form-usuario {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 16px;
+}
+
+.form-usuario .acoes {
+  grid-column: 1 / -1;
+}
+
+.erro-campo {
+  color: var(--cor-critico);
+  font-size: 0.8rem;
+}
+
+.senha {
+  position: relative;
+}
+
+.senha input {
+  padding-right: 80px;
+}
+
+.senha .botao-link {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.85rem;
+}
+
+.nota-senha {
+  align-self: end;
+  margin: 0 0 10px;
+}
+
+.aviso-sucesso {
+  background: var(--cor-baixo-fundo);
+  color: var(--cor-baixo);
+}
+
+tr.inativo td {
+  color: var(--cor-texto-fraco);
+}
+
+.acoes-linha {
+  display: flex;
+  justify-content: flex-end;
+  gap: 16px;
+}
+
+.perigo {
+  color: var(--cor-critico);
+}
+
+@media (max-width: 640px) {
+  .form-usuario {
+    grid-template-columns: 1fr;
+  }
+}

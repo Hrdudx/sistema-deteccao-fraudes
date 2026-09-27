@@ -550,3 +550,23 @@ a {
     flex: 1;
   }
 }
+
+/* ---------- Impressão (relatórios) ---------- */
+@media print {
+  app-sidebar,
+  .barra-superior,
+  .pular-conteudo,
+  .acoes-cabecalho,
+  .aviso {
+    display: none !important;
+  }
+
+  body {
+    background: #ffffff;
+  }
+
+  .card {
+    box-shadow: none;
+    break-inside: avoid;
+  }
+}

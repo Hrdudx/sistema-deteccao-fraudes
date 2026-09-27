@@ -1,0 +1,162 @@
+<app-cabecalho-pagina contexto="Administração" titulo="Usuários" subtitulo="Gestão de usuários e perfis de acesso">
+  <button type="button" class="botao" (click)="novo()">+ Novo usuário</button>
+</app-cabecalho-pagina>
+
+@if (demonstracao && !carregando) {
+  <div class="aviso" role="status">
+    <span>Backend sem a listagem de usuários — exibindo <strong>dados de demonstração</strong>. O cadastro já é enviado ao backend.</span>
+  </div>
+}
+
+@if (mensagem) {
+  <div class="aviso" [class.aviso-sucesso]="mensagem.tipo === 'sucesso'" role="status">
+    <span>{{ mensagem.texto }}</span>
+    <button type="button" class="botao-link" (click)="mensagem = null">Fechar</button>
+  </div>
+}
+
+@if (formulario; as f) {
+  <section class="card" aria-labelledby="titulo-form-usuario">
+    <h2 id="titulo-form-usuario">{{ f.id === null ? 'Novo usuário' : 'Editar usuário' }}</h2>
+
+    @if (erroFormulario) {
+      <div class="aviso aviso-erro" role="alert">{{ erroFormulario }}</div>
+    }
+
+    <form #form="ngForm" class="form-usuario" (ngSubmit)="salvar(form)" novalidate>
+      <div class="campo">
+        <label for="nome-usuario">Nome *</label>
+        <input id="nome-usuario" name="nome" [(ngModel)]="f.nome" required #nome="ngModel" autocomplete="off" />
+        @if (nome.invalid && nome.touched) {
+          <small class="erro-campo">Informe o nome.</small>
+        }
+      </div>
+      <div class="campo">
+        <label for="email-usuario">E-mail *</label>
+        <input id="email-usuario" type="email" name="email" [(ngModel)]="f.email" required email #email="ngModel" autocomplete="off" />
+        @if (email.invalid && email.touched) {
+          <small class="erro-campo">Informe um e-mail válido.</small>
+        }
+      </div>
+      <div class="campo">
+        <label for="perfil-usuario">Perfil *</label>
+        <select id="perfil-usuario" name="perfil" [(ngModel)]="f.perfil" required #perfil="ngModel">
+          <option value="" disabled>Selecione</option>
+          @for (p of perfis; track p.valor) {
+            <option [value]="p.valor">{{ p.rotulo }}</option>
+          }
+        </select>
+        @if (perfil.invalid && perfil.touched) {
+          <small class="erro-campo">Selecione o perfil.</small>
+        }
+      </div>
+      @if (f.id === null) {
+        <div class="campo">
+          <label for="senha-usuario">Senha inicial *</label>
+          <div class="senha">
+            <input
+              id="senha-usuario"
+              [type]="mostrarSenha ? 'text' : 'password'"
+              name="senha"
+              [(ngModel)]="f.senha"
+              required
+              minlength="6"
+              #senha="ngModel"
+              autocomplete="new-password"
+            />
+            <button type="button" class="botao-link" (click)="mostrarSenha = !mostrarSenha">{{ mostrarSenha ? 'Ocultar' : 'Mostrar' }}</button>
+          </div>
+          @if (senha.invalid && senha.touched) {
+            <small class="erro-campo">A senha deve ter pelo menos 6 caracteres.</small>
+          }
+        </div>
+      } @else {
+        <p class="texto-fraco nota-senha">A senha não é exibida nem alterada por aqui.</p>
+      }
+      <div class="acoes">
+        <button type="button" class="botao botao-secundario" (click)="cancelar()">Cancelar</button>
+        <button type="submit" class="botao" [disabled]="salvando">{{ salvando ? 'Salvando...' : 'Salvar' }}</button>
+      </div>
+    </form>
+  </section>
+}
+
+<section class="card" aria-label="Filtros">
+  <form class="filtros" (submit)="$event.preventDefault()">
+    <div class="campo">
+      <label for="busca-usuario">Pesquisar</label>
+      <input id="busca-usuario" type="search" placeholder="Nome ou e-mail" [(ngModel)]="busca" name="busca" autocomplete="off" />
+    </div>
+    <div class="campo">
+      <label for="filtro-perfil">Perfil</label>
+      <select id="filtro-perfil" [(ngModel)]="filtroPerfil" name="perfil">
+        <option value="">Todos</option>
+        @for (p of perfis; track p.valor) {
+          <option [value]="p.valor">{{ p.rotulo }}</option>
+        }
+      </select>
+    </div>
+    <div class="campo">
+      <label for="filtro-status">Situação</label>
+      <select id="filtro-status" [(ngModel)]="filtroStatus" name="status">
+        <option value="">Todas</option>
+        <option value="ATIVO">Ativo</option>
+        <option value="INATIVO">Inativo</option>
+      </select>
+    </div>
+  </form>
+</section>
+
+<section class="card" aria-labelledby="titulo-lista-usuarios">
+  <div class="card-cabecalho">
+    <h2 id="titulo-lista-usuarios">Usuários cadastrados</h2>
+    @if (!carregando && !erro) {
+      <span class="badge badge-info">{{ totalAtivos }} ativo(s) de {{ usuarios.length }}</span>
+    }
+  </div>
+
+  <app-estado-lista
+    [carregando]="carregando"
+    [erro]="erro"
+    [vazio]="!filtrados.length"
+    mensagemCarregando="Carregando usuários..."
+    mensagemVazio="Nenhum usuário encontrado."
+    (tentarNovamente)="carregar()"
+  ></app-estado-lista>
+
+  @if (!carregando && !erro && filtrados.length) {
+    <div class="tabela-rolagem">
+      <table class="tabela">
+        <thead>
+          <tr>
+            <th scope="col">Nome</th>
+            <th scope="col">E-mail</th>
+            <th scope="col">Perfil</th>
+            <th scope="col">Situação</th>
+            <th scope="col" class="numero">Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (u of filtrados; track u.id) {
+            <tr [class.inativo]="u.status !== 'ATIVO'">
+              <td class="id">{{ u.nome }}</td>
+              <td>{{ u.email }}</td>
+              <td>{{ rotuloPerfil(u.perfil) }}</td>
+              <td>
+                <span class="badge" [class.badge-baixo]="u.status === 'ATIVO'">{{ u.status === 'ATIVO' ? 'Ativo' : 'Inativo' }}</span>
+              </td>
+              <td class="numero">
+                <div class="acoes-linha">
+                <button type="button" class="botao-link" (click)="editar(u)" [attr.aria-label]="'Editar ' + u.nome">Editar</button>
+                <button type="button" class="botao-link" [class.perigo]="u.status === 'ATIVO'" (click)="alternarStatus(u)">
+                  {{ u.status === 'ATIVO' ? 'Inativar' : 'Reativar' }}
+                </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>

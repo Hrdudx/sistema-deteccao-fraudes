@@ -30,7 +30,8 @@ frontend/
 │   │   │   ├── clientes/           # Consulta de clientes
 │   │   │   ├── cliente-detalhe/    # Histórico do cliente (ocorrências, transações, contas)
 │   │   │   ├── login/              # Acesso (POST /api/auth/login)
-│   │   │   ├── em-construcao/      # Relatórios e Usuários (ainda sem tela)
+│   │   │   ├── relatorios/         # Relatórios gerenciais (CSV e impressão)
+│   │   │   ├── usuarios/           # Usuários e acessos (TEL13)
 │   │   │   └── nao-encontrada/     # 404
 │   │   ├── services/               # Home, Ocorrências, Clientes e Auth (API + fallback)
 │   │   │   └── dados-demonstracao.ts  # Base fictícia no formato do dicionário de dados
@@ -84,6 +85,8 @@ Testes unitários: `ng test`.
 | Ocorrências | `GET /api/alertas-pld`, `/api/chargebacks`, `/api/kycs`, `/api/alertas-fraude` |
 | Clientes | `GET /api/clientes`, `GET /api/clientes/{id}/historico` |
 | Login | `POST /api/auth/login` |
+| Usuários | `POST /api/usuarios` (já existe); `GET`, `PUT /{id}` e `PATCH /{id}/status` previstos no DRE — enquanto não existirem, a tela avisa e aplica só na tela |
+| Relatórios | mesmas listas de ocorrências e `GET /api/transacoes` |
 
 Quando a API não responde, cada tela mostra **dados de demonstração** com um aviso
 visível, para a apresentação não depender do backend no ar. A base de demonstração
@@ -136,7 +139,8 @@ A URL base da API é configurada em `src/environments/environment.ts` (`apiUrl`)
 - [x] Proxy de desenvolvimento para o backend (sem CORS) e título da aba por tela
 - [x] Testes unitários (formatação e cálculo dos indicadores); teste padrão do Angular corrigido
 - [ ] Tela de Fraude com filtros avançados (Gabriella) — a rota `/ocorrencias/fraude` usa a fila filtrada até ser integrada
-- [ ] Relatórios e Usuários
+- [x] Relatórios: resumo por tipo, resultado das análises, ocorrências por responsável, clientes com mais ocorrências e movimentações, com filtro de período, exportação CSV e impressão
+- [x] Usuários (TEL13): pesquisa, filtros, novo usuário (integrado ao `POST /api/usuarios`), edição, perfil e ativar/inativar sem apagar histórico
 
 ## Equipe
 
