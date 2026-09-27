@@ -13,14 +13,35 @@ import java.util.Map;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(RecursoNaoEncontradoException.class)
-    public ResponseEntity<Map<String, String>> tratarNaoEncontrado(RecursoNaoEncontradoException ex) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("erro", ex.getMessage()));
+    public ResponseEntity<Map<String, String>> tratarNaoEncontrado(
+            RecursoNaoEncontradoException ex) {
+
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(Map.of("erro", ex.getMessage()));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, String>> tratarValidacao(MethodArgumentNotValidException ex) {
+    public ResponseEntity<Map<String, String>> tratarValidacao(
+            MethodArgumentNotValidException ex) {
+
         Map<String, String> erros = new HashMap<>();
-        ex.getBindingResult().getFieldErrors().forEach(e -> erros.put(e.getField(), e.getDefaultMessage()));
+
+        ex.getBindingResult()
+                .getFieldErrors()
+                .forEach(e ->
+                        erros.put(e.getField(), e.getDefaultMessage())
+                );
+
         return ResponseEntity.badRequest().body(erros);
+    }
+
+    @ExceptionHandler(ClienteDuplicadoException.class)
+    public ResponseEntity<Map<String, String>> tratarClienteDuplicado(
+            ClienteDuplicadoException ex) {
+
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(Map.of("erro", ex.getMessage()));
     }
 }
