@@ -1,0 +1,159 @@
+
+<section class="pagina-fraude">
+  <header class="cabecalho">
+    <div>
+      <p class="subtitulo">GERENCIAMENTO DE RISCOS</p>
+      <h1>Ocorrências de Fraude</h1>
+      <p class="descricao">
+        Consulte e filtre os alertas de fraude registrados no sistema.
+      </p>
+    </div>
+
+    <button class="botao-atualizar" type="button" (click)="buscarAlertas()">
+      Atualizar registros
+    </button>
+  </header>
+
+  <section class="painel-filtros">
+    <h2>Filtros de pesquisa</h2>
+
+    <form (ngSubmit)="buscarAlertas()">
+      <div class="grade-filtros">
+        <label>
+          Status da análise
+          <input
+            type="text"
+            name="status"
+            [(ngModel)]="filtros.status"
+            placeholder="Ex.: Em análise"
+          />
+        </label>
+
+        <label>
+          Severidade
+          <input
+            type="text"
+            name="severidade"
+            [(ngModel)]="filtros.severidade"
+            placeholder="Ex.: Alta"
+          />
+        </label>
+
+        <label>
+          Tipo de fraude
+          <input
+            type="text"
+            name="tipoFraude"
+            [(ngModel)]="filtros.tipoFraude"
+            placeholder="Digite o tipo"
+          />
+        </label>
+
+        <label>
+          Data inicial
+          <input
+            type="date"
+            name="dataInicial"
+            [(ngModel)]="filtros.dataInicial"
+          />
+        </label>
+
+        <label>
+          Data final
+          <input
+            type="date"
+            name="dataFinal"
+            [(ngModel)]="filtros.dataFinal"
+          />
+        </label>
+
+        <label class="campo-busca">
+          Buscar cliente ou documento
+          <input
+            type="text"
+            name="busca"
+            [(ngModel)]="filtros.busca"
+            placeholder="Nome ou documento do cliente"
+          />
+        </label>
+      </div>
+
+      <div class="acoes-filtros">
+        <button class="botao-limpar" type="button" (click)="limparFiltros()">
+          Limpar filtros
+        </button>
+
+        <button class="botao-pesquisar" type="submit">
+          Pesquisar
+        </button>
+      </div>
+    </form>
+  </section>
+
+  <section class="painel-registros">
+    <div class="titulo-registros">
+      <div>
+        <h2>Registros encontrados</h2>
+        <p>Alertas retornados pela consulta.</p>
+      </div>
+
+      <span class="contador">{{ alertas.length }} registro(s)</span>
+    </div>
+
+    <div *ngIf="carregando" class="estado">
+      Carregando alertas...
+    </div>
+
+    <div *ngIf="erro && !carregando" class="estado estado-erro">
+      {{ erro }}
+    </div>
+
+    <div
+      *ngIf="!carregando && !erro && alertas.length === 0"
+      class="estado"
+    >
+      Nenhum alerta encontrado para os filtros informados.
+    </div>
+
+    <div
+      class="tabela-responsiva"
+      *ngIf="!carregando && !erro && alertas.length > 0"
+    >
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Data</th>
+            <th>Tipo de fraude</th>
+            <th>Score</th>
+            <th>Severidade</th>
+            <th>Status</th>
+            <th>Valor exposto</th>
+            <th>Perda</th>
+            <th>Analista</th>
+            <th>Resultado</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let alerta of alertas">
+            <td>{{ alerta.idAlertaFraude }}</td>
+            <td>{{ formatarData(alerta.dataAlerta) }}</td>
+            <td>{{ alerta.tipoFraude }}</td>
+            <td>{{ alerta.scoreFraude }}</td>
+            <td>
+              <span class="etiqueta">
+                {{ alerta.severidade }}
+              </span>
+            </td>
+            <td>{{ alerta.statusAnalise }}</td>
+            <td>{{ formatarMoeda(alerta.valorExposto) }}</td>
+            <td>{{ formatarMoeda(alerta.valorPerda) }}</td>
+            <td>{{ alerta.analistaResponsavel }}</td>
+            <td>{{ alerta.resultado }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</section>
